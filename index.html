@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>INSTRUCT-FD</title>
+<meta name="description" content="INSTRUCT-FD: a benchmark asking whether full-duplex speech systems can follow conversational interaction instructions.">
+<meta property="og:title" content="INSTRUCT-FD">
+<meta property="og:description" content="Can your full-duplex speech system follow conversational interaction instructions?">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+<style>
+  :root{
+    --bg:#fafbfc; --panel:#fff; --ink:#0c1015; --dim:#5b6572; --line:#e3e7ec;
+    --blue:#1a74d0; --blue-w:#e8f1fb; --green:#0e8f54; --orange:#d97112; --red:#d63f3c;
+    --violet:#6a4bc4;
+    --t-hold:#1c5fa8; --t-yield:#b8560a;
+    --mono:ui-monospace,SFMono-Regular,"DM Mono",Menlo,monospace;
+    --maxw:860px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0c1015;--panel:#151b22;--ink:#e9edf2;--dim:#98a4b3;--line:#252d37;
+      --blue:#5aa2e8;--blue-w:#16283d;--green:#3cb87c;--orange:#e89545;--red:#e86b68;
+      --violet:#9b83e0;--t-hold:#7db4ec;--t-yield:#f0aa55;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1015;--panel:#151b22;--ink:#e9edf2;--dim:#98a4b3;--line:#252d37;
+    --blue:#5aa2e8;--blue-w:#16283d;--green:#3cb87c;--orange:#e89545;--red:#e86b68;
+    --violet:#9b83e0;--t-hold:#7db4ec;--t-yield:#f0aa55;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.65 -apple-system,BlinkMacSystemFont,"Inter",system-ui,sans-serif;
+       padding:0 16px}
+  a{color:var(--blue)}
+  .wrap{max-width:var(--maxw);margin:0 auto}
+
+  /* ---- header ---- */
+  header{padding:56px 0 8px;text-align:center}
+  h1{font-size:clamp(26px,4.4vw,38px);line-height:1.2;margin:0 0 6px;
+     font-weight:680;letter-spacing:-.02em}
+  .sub{font-size:clamp(15px,2.1vw,18px);color:var(--dim);margin:0 auto 26px;
+       max-width:660px;line-height:1.45;font-weight:450}
+  .authors{font-size:15.5px;margin:0 0 4px;line-height:1.7}
+  .affil{font-size:14px;color:var(--dim);margin:0 0 22px}
+  .todo{background:var(--blue-w);border:1px dashed var(--blue);color:var(--blue);
+        border-radius:7px;padding:3px 9px;font-size:13px;font-family:var(--mono);
+        display:inline-block}
+
+  .badges{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:0 0 10px}
+  .badge{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;
+         border:1px solid var(--line);background:var(--panel);color:var(--ink);
+         text-decoration:none;font-size:14.5px;font-weight:550;transition:.15s}
+  .badge:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-1px)}
+  .badge svg{width:15px;height:15px;flex:none}
+
+  /* ---- sections ---- */
+  section{padding:30px 0;border-top:1px solid var(--line)}
+  section:first-of-type{border-top:none}
+  h2{font-size:21px;margin:0 0 14px;font-weight:640;letter-spacing:-.01em}
+  h3{font-size:16.5px;margin:24px 0 8px;font-weight:620}
+  p{margin:0 0 14px}
+  .lead{font-size:16.5px}
+
+  figure{margin:22px 0;text-align:center}
+  figure img{max-width:100%;height:auto;border:1px solid var(--line);
+             border-radius:9px;background:var(--panel)}
+  figcaption{font-size:13.5px;color:var(--dim);margin-top:9px;text-align:left;line-height:1.5}
+
+  /* ---- tables ---- */
+  .scroll{overflow-x:auto;margin:16px 0;-webkit-overflow-scrolling:touch}
+  table{border-collapse:separate;border-spacing:0;width:100%;min-width:560px;
+        background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{padding:9px 13px;text-align:center;border-bottom:1px solid var(--line);font-size:14px}
+  th{background:var(--bg);font-weight:620;font-size:12px;color:var(--dim);
+     text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  td:first-child,th:first-child{text-align:left;font-weight:600;white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  td{font-family:var(--mono);font-size:13.5px}
+  td:first-child{font-family:inherit}
+  .best{color:var(--green);font-weight:700}
+  .sig{color:var(--violet);font-weight:700}
+  .tnote{font-size:13px;color:var(--dim);margin:8px 0 0}
+
+  /* ---- findings ---- */
+  .finding{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--blue);
+           border-radius:8px;padding:14px 17px;margin:12px 0}
+  .finding b{display:block;margin-bottom:4px;font-size:15.5px}
+  .finding p{margin:0;font-size:14.5px;color:var(--dim);line-height:1.6}
+
+  /* ---- demos ---- */
+  .demo{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+        padding:17px;margin:15px 0}
+  .demo-h{font-size:12px;text-transform:uppercase;letter-spacing:.05em;
+          color:var(--dim);margin-bottom:3px;font-weight:620}
+  .demo-t{font-size:16px;font-weight:600;margin-bottom:13px}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  @media(max-width:620px){.pair{grid-template-columns:1fr}}
+  .cond{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg)}
+  .cond.a{border-top:3px solid var(--t-hold)}
+  .cond.b{border-top:3px solid var(--t-yield)}
+  .instr{font-size:13.5px;line-height:1.5;margin-bottom:10px;min-height:42px}
+  .instr::before{content:"“"}.instr::after{content:"”"}
+  audio{width:100%;height:34px}
+  .ph{border:1px dashed var(--line);border-radius:6px;padding:13px;text-align:center;
+      color:var(--dim);font-size:12.5px;font-family:var(--mono)}
+
+  /* ---- bibtex ---- */
+  .bibwrap{position:relative}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:9px;
+      padding:15px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;
+      line-height:1.6;margin:0}
+  .copy{position:absolute;top:9px;right:9px;padding:5px 11px;border-radius:6px;
+        border:1px solid var(--line);background:var(--bg);color:var(--dim);
+        cursor:pointer;font-size:12px;font-family:inherit}
+  .copy:hover{border-color:var(--blue);color:var(--blue)}
+
+  footer{border-top:1px solid var(--line);padding:24px 0 48px;
+         font-size:13.5px;color:var(--dim);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>INSTRUCT-FD</h1>
+  <p class="sub">Can your full-duplex speech system follow conversational interaction instructions?</p>
+
+  <p class="authors"><span class="todo">author list — to be filled in</span></p>
+  <p class="affil">Boson AI</p>
+
+  <div class="badges">
+    <a class="badge" href="https://arxiv.org/abs/2607.20460">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h6l4 4v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zm5 1v4h4z"/></svg>
+      arXiv
+    </a>
+    <a class="badge" href="#demos">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a3 3 0 0 1 3 3v4a3 3 0 1 1-6 0V4a3 3 0 0 1 3-3zM4 7a4 4 0 0 0 8 0h1a5 5 0 0 1-4.5 4.98V15h-1v-3.02A5 5 0 0 1 3 7z"/></svg>
+      Listen
+    </a>
+    <a class="badge" href="#results">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 13h12v1H2zM3 8h2v4H3zm4-5h2v9H7zm4 3h2v6h-2z"/></svg>
+      Results
+    </a>
+  </div>
+</header>
+
+<section>
+  <h2>Overview</h2>
+  <p class="lead">Spoken dialogue models are moving beyond turn-by-turn interaction toward
+  <b>full-duplex</b> conversation, where the model listens and speaks at the same time. Such a
+  system must manage the conversational floor in real time: when to keep listening, when to
+  backchannel, when to interrupt, when to continue, and when to yield.</p>
+
+  <p>Existing benchmarks score conformity to a <i>single fixed repertoire</i> of turn-taking
+  behavior. But appropriate interaction behavior depends on context and user preference. A model
+  told <i>“interrupt me if you hear me making a mistake”</i> should behave differently from one told
+  <i>“let me finish my thoughts before jumping in.”</i> Both are legitimate, and a fixed repertoire
+  can only score one of them.</p>
+
+  <p>So we reframe turn management as an <b>instruction-following problem</b>: can a full-duplex
+  spoken dialogue model change its interaction behavior under explicit instruction? We formalize a
+  conversational interaction instruction as a mapping from a <b>trigger cue</b> to the
+  <b>floor-management action</b> to take upon observing that cue, and organize the instruction space
+  along five cue categories — temporal, linguistic, speaker attribution, paralinguistic, and sound
+  event — crossed with four contrastive action pairs.</p>
+</section>
+
+<section>
+  <h2>The contrastive design</h2>
+  <p>A model can score well on an instruction simply because the instructed behavior happens to
+  match what it would have done anyway. To separate genuine instruction following from a lucky
+  default, INSTRUCT-FD uses a <b>scenario-controlled contrastive evaluation</b>: each test case fixes
+  one scripted scenario and pairs it with <b>two contrasting instructions</b> that prescribe
+  different actions <i>at the same cue</i>. A model passes only if it produces the prescribed
+  behavior under <b>both</b>.</p>
+
+  <figure>
+    <img src="static/figures/fig1_protocol.png" alt="The INSTRUCT-FD evaluation protocol.">
+    <figcaption><b>Figure 1.</b> The evaluation protocol. One scripted scenario is paired with two
+    contrasting instructions prescribing different floor actions at the same cue instant.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="static/figures/fig2_pipeline.png" alt="The test-case generation pipeline.">
+    <figcaption><b>Figure 2.</b> Synthetic test-case generation and validation pipeline.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="static/figures/fig3_orchestrator.png" alt="The multi-turn user orchestrator.">
+    <figcaption><b>Figure 3.</b> The multi-turn user orchestrator, which drives the scripted user
+    side of the conversation and holds cue timing fixed across conditions.</figcaption>
+  </figure>
+</section>
+
+<section id="results">
+  <h2>Results</h2>
+  <p><b>Instruction Adherence Score (IAS).</b> <i>Overall</i> aggregates all
+  instruction-conditioned cases.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Model</th><th>Overall</th><th>Listen</th><th>Backchannel</th>
+      <th>Interrupt</th><th>Continue</th><th>Acknowledge</th></tr></thead>
+    <tbody>
+      <tr><td>Freeze-Omni</td><td>10.7%</td><td>7.1%</td><td>0.0%</td><td>5.0%</td><td>40.0%</td><td>9.6%</td></tr>
+      <tr><td>Gemini</td><td class="best">64.4%</td><td>72.4%</td><td>50.0%</td><td>5.8%</td><td>71.7%</td><td>86.3%</td></tr>
+      <tr><td>MiniCPM-o</td><td>36.4%</td><td>59.6%</td><td>12.5%</td><td>1.7%</td><td>97.5%</td><td>5.4%</td></tr>
+      <tr><td>Moshi</td><td>21.1%</td><td>12.8%</td><td>1.7%</td><td>11.7%</td><td>88.3%</td><td>12.0%</td></tr>
+      <tr><td>PersonaPlex</td><td>47.0%</td><td>66.7%</td><td>5.8%</td><td>10.0%</td><td>90.0%</td><td>35.8%</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p style="margin-top:22px"><b>Instruction Sensitivity (ΔIAS).</b> How much behavior actually
+  shifts between the two contrasting instructions.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Model</th><th>ΔListen</th><th>ΔBackchannel</th><th>ΔInterrupt</th>
+      <th>ΔContinue</th><th>ΔAcknowledge</th></tr></thead>
+    <tbody>
+      <tr><td>Freeze-Omni</td><td>−1.0%</td><td>+0.0%</td><td>−2.5%</td><td>−0.8%</td><td>+0.8%</td></tr>
+      <tr><td>Gemini</td><td>+3.5%</td><td class="sig">+42.5%</td><td>+0.0%</td><td>+6.7%</td><td class="sig">+11.7%</td></tr>
+      <tr><td>MiniCPM-o</td><td class="sig">+10.6%</td><td>+6.7%</td><td>−5.0%</td><td>−0.8%</td><td>+3.3%</td></tr>
+      <tr><td>Moshi</td><td>+1.9%</td><td>−6.7%</td><td>+2.5%</td><td>+5.0%</td><td>+1.7%</td></tr>
+      <tr><td>PersonaPlex</td><td>+5.8%</td><td>−2.5%</td><td>+5.0%</td><td>+2.5%</td><td>+4.6%</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="tnote"><span class="sig">Purple</span> marks significance under McNemar with Holm
+  correction, <i>p</i> &lt; 0.05.</p>
+
+  <h3>Three headline findings</h3>
+
+  <div class="finding">
+    <b>Nobody is close to controllable.</b>
+    <p>Gemini leads at 64.4%, then PersonaPlex (47.0%) and MiniCPM-o (36.4%); Freeze-Omni sits at
+    10.7%. Even the best system fails a third of instructions.</p>
+  </div>
+
+  <div class="finding">
+    <b>Proactive versus responsive is the dominant axis.</b>
+    <p><i>Continue</i> is high nearly everywhere (40.0–97.5%) — but it is also the behavior a model
+    gets right by simply not stopping. <i>Backchannel</i> (0.0–50.0%) and <i>Interrupt</i>
+    (1.7–11.7%) are low for <b>every</b> model. Speaking <b>into</b> user speech, at the right
+    moment, is the unsolved capability.</p>
+  </div>
+
+  <div class="finding">
+    <b>Instruction conditioning mostly does nothing.</b>
+    <p>Significant positive shifts are confined to a few cells — Gemini on Backchannel (+42.5%) and
+    Acknowledge (+11.7%), MiniCPM-o on Listen (+10.6%). Elsewhere deltas are near zero: high scores
+    are inherent behavior that happens to match the instruction, not compliance.</p>
+  </div>
+</section>
+
+<section id="demos">
+  <h2>Listen to the contrast</h2>
+  <p>Each demo below is one scenario rendered twice, under two instructions that prescribe
+  <b>different</b> actions at the <b>same</b> cue. The scenario audio is identical; only the
+  instruction changes. If a model were controllable, the two recordings would diverge at the cue.</p>
+
+  <div class="demo">
+    <div class="demo-h">Backchannel vs. Silent · Gemini</div>
+    <div class="demo-t">Planting the last bed — “chard again”</div>
+    <div class="pair">
+      <div class="cond a">
+        <div class="instr">Backchannel when I repeat myself.</div>
+        <div class="ph">audio — to be added</div>
+      </div>
+      <div class="cond b">
+        <div class="instr">Stay silent when I repeat myself.</div>
+        <div class="ph">audio — to be added</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="demo-h">Take turn vs. Stay silent · Gemini</div>
+    <div class="demo-t">Running shoe fitting — browse mutter</div>
+    <div class="pair">
+      <div class="cond a">
+        <div class="instr">Two words is nothing — keep going.</div>
+        <div class="ph">audio — to be added</div>
+      </div>
+      <div class="cond b">
+        <div class="instr">Stop dead if I start a word.</div>
+        <div class="ph">audio — to be added</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="demo-h">Speaker attribution · Gemini</div>
+    <div class="demo-t">Two cooks swap reader and pan — chickpea step</div>
+    <div class="pair">
+      <div class="cond a">
+        <div class="instr">Acknowledge whoever is at the pan.</div>
+        <div class="ph">audio — to be added</div>
+      </div>
+      <div class="cond b">
+        <div class="instr">Acknowledge whoever reads.</div>
+        <div class="ph">audio — to be added</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tnote">Demo scenarios are placeholders pending final selection; the three above are drawn
+  from the rendered evaluation runs and will be replaced with the curated set.</p>
+</section>
+
+<section>
+  <h2>Citation</h2>
+  <div class="bibwrap">
+    <button class="copy" id="cp">Copy</button>
+<pre id="bib">@article{instructfd2026,
+  title   = {INSTRUCT-FD: Can Your Full-Duplex Speech System Follow
+             Conversational Interaction Instructions?},
+  author  = {TODO},
+  journal = {arXiv preprint arXiv:2607.20460},
+  year    = {2026}
+}</pre>
+  </div>
+</section>
+
+<footer>
+  Boson AI · <a href="https://arxiv.org/abs/2607.20460">arXiv:2607.20460</a>
+</footer>
+
+</div>
+<script>
+  document.getElementById('cp').addEventListener('click', function(){
+    var t = document.getElementById('bib').innerText, b = this;
+    navigator.clipboard.writeText(t).then(function(){
+      b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1600);
+    }).catch(function(){ b.textContent = 'Press ⌘C'; });
+  });
+</script>
+</body>
+</html>
