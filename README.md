@@ -1,16 +1,19 @@
-# INSTRUCT-FD — project page
+# Instruct-FD — project page
 
 Source for <https://instruct-fd.github.io/>.
 
-Companion site to *INSTRUCT-FD: Can Your Full-Duplex Speech System Follow
-Conversational Interaction Instructions?* (arXiv:2607.20460), Boson AI.
+Companion site to *Instruct-FD: Can Your Full-Duplex Speech System Follow
+Turn-Taking Instructions?* — Boson AI.
+
+Content is kept in sync with the poster, which is the ground truth for
+results and methodology.
 
 ## Layout
 
 ```
 index.html              the page
-static/figures/         figures from the paper
-static/audio/           demo clips (Opus), added per scenario
+static/figures/         figures extracted from the poster
+static/audio/           demo clips, added per scenario
 .nojekyll               serve files as-is, no Jekyll processing
 ```
 
