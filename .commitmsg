@@ -1,0 +1,24 @@
+Add a model-level leaderboard; swap the hero nav links
+
+Hero drops Results and Failure cases in favour of Overview (anchored on
+the existing Motivation section) and Leaderboard.
+
+The leaderboard reports one row per model rather than per configuration.
+Where a model ran under several settings, only its best paired pass rate
+is listed and the configuration is named beside it: Gemini Live 2.5
+Flash keeps proactive (7.5 over 7.4) and GPT-Realtime keeps VAD (2.7
+over 1.9). That takes 15 configurations down to 13 models. Table 1 still
+carries every configuration.
+
+The -RL variants stay as separate rows. Interaction RL post-training
+produces different weights rather than a different inference setting, so
+Moshi/Moshi-RL and PersonaPlex/PersonaPlex-RL are not the same model
+under two configs.
+
+Styling follows the ihbench leaderboard: sortable columns, family colour
+dots, inline proportional bars with the number at the end, and a
+segmented All / Closed-source / Open-weight filter. Second metric is the
+per-instruction average from Figure 4, which mostly reflects default
+behaviour rather than instruction following.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>

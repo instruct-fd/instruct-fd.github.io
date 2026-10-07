@@ -139,6 +139,40 @@
   .b1 { color: var(--green); font-weight: 700; }
   .b2 { text-decoration: underline; text-underline-offset: 3px; }
   td.avg { border-left: 1px solid var(--border); font-weight: 700; color: var(--text); }
+  /* ---------- leaderboard ---------- */
+  .lb-controls { display: flex; gap: 10px; align-items: center; margin: 18px 0 14px; flex-wrap: wrap; }
+  .lb-controls .seg { display: flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .lb-controls .seg button { background: var(--surface); color: var(--muted); border: 0;
+      padding: 7px 16px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .lb-controls .seg button[aria-pressed="true"] { background: var(--green-dim); color: var(--green); }
+  .lb-controls .hint { font-size: 12px; color: var(--muted); }
+
+  table.board { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 520px; }
+  table.board th { text-align: right; padding: 10px; color: var(--muted); font-weight: 700;
+      font-size: 11px; text-transform: uppercase; letter-spacing: .05em; font-family: var(--display);
+      border-bottom: 1px solid var(--border); cursor: pointer; white-space: nowrap; }
+  table.board th:first-child { text-align: left; }
+  table.board th.sorted { color: var(--green); }
+  table.board td { text-align: right; padding: 10px; border-bottom: 1px solid rgba(255,255,255,.05); }
+  table.board td:first-child { text-align: left; color: var(--text); font-weight: 600; }
+  table.board tr:hover td { background: rgba(255,255,255,.02); }
+  table.board tbody tr:last-child td { border-bottom: none; }
+  .lb-pos { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px;
+            margin-right: 10px; font-weight: 700; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+         margin-right: 8px; vertical-align: middle; }
+  .cfg { color: var(--muted); font-weight: 500; font-size: 12px; }
+  .tag-open { font-size: 9.5px; color: var(--amber); border: 1px solid rgba(224,136,60,.45);
+      border-radius: 5px; padding: 1px 5px; margin-left: 7px; text-transform: uppercase;
+      letter-spacing: .05em; font-weight: 700; vertical-align: middle; }
+  .bar-wrap { display: flex; align-items: center; gap: 9px; justify-content: flex-end; }
+  .bar-track { flex: 1; height: 8px; border-radius: 4px; background: rgba(255,255,255,.06);
+               position: relative; min-width: 48px; }
+  .bar-fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; }
+  .bar-num { font-variant-numeric: tabular-nums; min-width: 46px; text-align: right;
+             color: var(--body); font-weight: 600; }
+  .lb-legend { font-size: 12px; color: var(--muted); margin-top: 12px; line-height: 1.7; }
+
   .scroll-hint { display: none; }
   @media (max-width: 700px) {
     .scroll-hint { display: block; text-align: right; font-size: 11px; color: var(--green); margin-top: -8px; }
@@ -218,12 +252,12 @@
     <span class="pill-link pill-soon">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2c3 0 5.5 1 5.5 2.3v7.4C13.5 13 11 14 8 14s-5.5-1-5.5-2.3V4.3C2.5 3 5 2 8 2zm0 1.2c-2.6 0-4.3.8-4.3 1.1S5.4 5.4 8 5.4s4.3-.8 4.3-1.1S10.6 3.2 8 3.2z"/></svg>
       Data <span class="soon">soon</span></span>
-    <a class="pill-link" href="#results">
-      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 13h12v1H2zM3 8h2v4H3zm4-5h2v9H7zm4 3h2v6h-2z"/></svg>
-      Results</a>
-    <a class="pill-link" href="#failures">
-      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l7 13H1zM7.4 6v4h1.2V6zm0 5v1.3h1.2V11z"/></svg>
-      Failure cases</a>
+    <a class="pill-link" href="#overview">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1.6H2zm0 4h12v1.6H2zm0 4h8v1.6H2z"/></svg>
+      Overview</a>
+    <a class="pill-link" href="#leaderboard">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 2h4v12H6zM1.5 6H5v8H1.5zM11 8.5h3.5V14H11z"/></svg>
+      Leaderboard</a>
   </div>
 
   <div class="stats three">
@@ -233,7 +267,7 @@
   </div>
 </header>
 
-<section>
+<section id="overview">
   <div class="lead-kicker">01 — Motivation</div>
   <h2>A fixed repertoire is the wrong target</h2>
   <p>Existing full-duplex benchmarks — Full-Duplex-Bench v1 [1], v1.5 [2], FLEXI [3] — test whether a
@@ -310,8 +344,48 @@
   </div>
 </section>
 
+<section id="leaderboard">
+  <div class="lead-kicker">04 — Leaderboard</div>
+  <h2>One score per model</h2>
+  <p>Each system appears once, at its <b>best-scoring configuration</b>. Where a model was evaluated
+  under more than one setting — Gemini Live with and without proactive mode, GPT-Realtime under VAD
+  and SVAD — only the stronger result is listed, and the configuration is named beside it. Table 1
+  below keeps every configuration separately.</p>
+
+  <div class="lb-controls">
+    <div class="seg" id="lb-filter">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="closed" aria-pressed="false">Closed-source</button>
+      <button type="button" data-f="open" aria-pressed="false">Open-weight</button>
+    </div>
+    <span class="hint">Click a column to sort</span>
+  </div>
+
+  <div class="scroll-x">
+    <table class="board" id="board">
+      <thead><tr>
+        <th data-k="name">Model</th>
+        <th data-k="paired" class="sorted">Paired pass rate &#9660;</th>
+        <th data-k="per">Per-instruction</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="lb-legend">
+    <span class="dot" style="background:#34D399"></span>OpenAI
+    <span class="dot" style="background:#7EA2F5;margin-left:14px"></span>Google
+    <span class="dot" style="background:#B794F6;margin-left:14px"></span>xAI
+    <span class="dot" style="background:#E0883C;margin-left:14px"></span>Open-weight<br>
+    <b style="color:var(--text)">Paired pass rate</b> is the headline metric: a case counts only when
+    the model obeys <i>both</i> contrasting instructions.
+    <b style="color:var(--text)">Per-instruction</b> scores each condition on its own, so it largely
+    reflects a system's default behaviour rather than its responsiveness to instruction.
+  </div>
+</section>
+
 <section id="results">
-  <div class="lead-kicker">04 — Main results</div>
+  <div class="lead-kicker">05 — Main results</div>
   <h2>No system reliably follows turn-taking instructions</h2>
 
   <div class="scroll-x">
@@ -356,7 +430,7 @@
 </section>
 
 <section>
-  <div class="lead-kicker">05 — Analysis</div>
+  <div class="lead-kicker">06 — Analysis</div>
   <h2>What the systems are actually doing</h2>
 
   <p class="claim">Per-instruction pass rates reveal each system's default turn-taking behaviour.</p>
@@ -421,7 +495,7 @@
 </section>
 
 <section id="failures">
-  <div class="lead-kicker">06 — What model failure looks like</div>
+  <div class="lead-kicker">07 — What model failure looks like</div>
   <h2>Five sessions, five failure modes</h2>
   <p>Timestamps are seconds on the shared session clock; overlapping ranges mean both channels are
   active.</p>
@@ -536,6 +610,90 @@
       b.textContent = 'Press ⌘C';
     });
   });
+
+/* ---------- leaderboard: one row per model, best configuration only ---------- */
+(function () {
+  var FAM = { openai:'#34D399', google:'#7EA2F5', xai:'#B794F6', open:'#E0883C' };
+  // paired = Table 1 Avg (headline).  per = Figure 4 Avg (default behaviour).
+  // Models evaluated under several configs keep only their best paired score; cfg names it.
+  var LB = [
+    { name:'GPT-Live-1',               fam:'openai', open:false, cfg:null,        paired:16.5, per:44.3 },
+    { name:'Gemini Live 2.5 Flash',    fam:'google', open:false, cfg:'proactive', paired: 7.5, per:40.5 },
+    { name:'Lychee-FD',                fam:'open',   open:true,  cfg:null,        paired: 6.5, per:30.5 },
+    { name:'MiniCPM-o 4.5',            fam:'open',   open:true,  cfg:null,        paired: 4.6, per:33.3 },
+    { name:'PersonaPlex',              fam:'open',   open:true,  cfg:null,        paired: 3.8, per:27.8 },
+    { name:'Moshi',                    fam:'open',   open:true,  cfg:null,        paired: 3.7, per:26.4 },
+    { name:'Grok Voice Think-Fast 2.0',fam:'xai',    open:false, cfg:null,        paired: 3.2, per:38.3 },
+    { name:'Moshi-RL',                 fam:'open',   open:true,  cfg:null,        paired: 3.2, per:30.6 },
+    { name:'PersonaPlex-RL',           fam:'open',   open:true,  cfg:null,        paired: 2.9, per:30.8 },
+    { name:'GPT-Realtime',             fam:'openai', open:false, cfg:'VAD',       paired: 2.7, per:37.4 },
+    { name:'Nemotron-VoiceChat-11B',   fam:'open',   open:true,  cfg:null,        paired: 2.4, per:28.8 },
+    { name:'DuplexCascade',            fam:'open',   open:true,  cfg:null,        paired: 2.1, per:31.1 },
+    { name:'Freeze-Omni',              fam:'open',   open:true,  cfg:null,        paired: 1.0, per:20.0 }
+  ];
+  var MAX = { paired: Math.max.apply(null, LB.map(function(r){return r.paired;})),
+              per:    Math.max.apply(null, LB.map(function(r){return r.per;})) };
+
+  var sortKey = 'paired', sortDir = -1, filter = 'all';
+  var tbody = document.querySelector('#board tbody');
+  if (!tbody) return;
+
+  function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+  function cell(r, key) {
+    var c = FAM[r.fam];
+    return '<td><div class="bar-wrap">'
+         + '<span class="bar-track"><span class="bar-fill" style="width:'
+         + (r[key] / MAX[key] * 100).toFixed(1) + '%;background:' + c + '"></span></span>'
+         + '<span class="bar-num">' + r[key].toFixed(1) + '</span></div></td>';
+  }
+
+  function render() {
+    var rows = LB.filter(function (r) {
+      return filter === 'all' || (filter === 'open' ? r.open : !r.open);
+    }).sort(function (a, b) {
+      if (sortKey === 'name') return sortDir * String(a.name).localeCompare(String(b.name));
+      return sortDir * (a[sortKey] - b[sortKey]);
+    });
+
+    tbody.innerHTML = rows.map(function (r, i) {
+      return '<tr><td><span class="lb-pos">' + (i + 1) + '</span>'
+           + '<span class="dot" style="background:' + FAM[r.fam] + '"></span>'
+           + esc(r.name)
+           + (r.cfg ? ' <span class="cfg">(' + esc(r.cfg) + ')</span>' : '')
+           + (r.open ? '<span class="tag-open">open</span>' : '')
+           + '</td>' + cell(r, 'paired') + cell(r, 'per') + '</tr>';
+    }).join('');
+
+    document.querySelectorAll('#board th').forEach(function (th) {
+      var on = th.dataset.k === sortKey;
+      th.classList.toggle('sorted', on);
+      var base = th.textContent.replace(/[\u25B2\u25BC]\s*$/, '').trim();
+      th.textContent = on ? base + (sortDir < 0 ? ' \u25BC' : ' \u25B2') : base;
+    });
+  }
+
+  document.querySelectorAll('#board th').forEach(function (th) {
+    th.addEventListener('click', function () {
+      var k = th.dataset.k;
+      if (k === sortKey) sortDir *= -1;
+      else { sortKey = k; sortDir = (k === 'name') ? 1 : -1; }
+      render();
+    });
+  });
+
+  document.querySelectorAll('#lb-filter button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      filter = b.dataset.f;
+      document.querySelectorAll('#lb-filter button').forEach(function (x) {
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+      render();
+    });
+  });
+
+  render();
+})();
 </script>
 </body>
 </html>
