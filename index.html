@@ -66,6 +66,15 @@
   .soon { font-size: 10px; text-transform: uppercase; letter-spacing: .07em;
           font-weight: 700; color: var(--green); font-family: var(--display); }
 
+  .tabs { display: flex; gap: 7px; margin-bottom: 26px; flex-wrap: wrap; }
+  .tab { border-radius: 999px; border: 1px solid var(--border); background: var(--surface);
+         color: var(--muted); padding: 9px 26px; font: inherit; font-family: var(--display);
+         font-weight: 700; font-size: 14px; cursor: pointer; transition: .15s; }
+  .tab:hover { border-color: var(--green); }
+  .tab[aria-pressed="true"] { border-color: var(--green); background: var(--green-dim);
+                              color: var(--green); }
+  [hidden] { display: none !important; }
+
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 8px; }
   .stats.three { grid-template-columns: repeat(3, 1fr); }
   @media (max-width: 620px) {
@@ -252,21 +261,22 @@
     <span class="pill-link pill-soon">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2c3 0 5.5 1 5.5 2.3v7.4C13.5 13 11 14 8 14s-5.5-1-5.5-2.3V4.3C2.5 3 5 2 8 2zm0 1.2c-2.6 0-4.3.8-4.3 1.1S5.4 5.4 8 5.4s4.3-.8 4.3-1.1S10.6 3.2 8 3.2z"/></svg>
       Data <span class="soon">soon</span></span>
-    <a class="pill-link" href="#overview">
-      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1.6H2zm0 4h12v1.6H2zm0 4h8v1.6H2z"/></svg>
-      Overview</a>
-    <a class="pill-link" href="#leaderboard">
-      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6 2h4v12H6zM1.5 6H5v8H1.5zM11 8.5h3.5V14H11z"/></svg>
-      Leaderboard</a>
   </div>
 
-  <div class="stats three">
+  <div class="tabs" id="views">
+    <button type="button" class="tab" data-view="overview" aria-pressed="true">Overview</button>
+    <button type="button" class="tab" data-view="leaderboard" aria-pressed="false">Leaderboard</button>
+  </div>
+
+  <div class="stats">
     <div class="stat"><div class="stat-num">679</div><div class="stat-label">scenarios</div></div>
+    <div class="stat"><div class="stat-num">1,358</div><div class="stat-label">test cases</div></div>
     <div class="stat"><div class="stat-num">15</div><div class="stat-label">realtime systems evaluated</div></div>
     <div class="stat"><div class="stat-num bad">16.5%</div><div class="stat-label">best pass rate</div></div>
   </div>
 </header>
 
+<div id="view-overview">
 <section id="overview">
   <h2>Can a full-duplex speech system change its turn-taking behaviour when instructed to?</h2>
 
@@ -342,44 +352,8 @@
   per-instruction simply by always staying silent, and still score near zero paired.</p>
 </section>
 
-<section id="leaderboard">
+<section>
   <h2>Results</h2>
-
-  <p>Each system appears once, at its <b>best-scoring configuration</b>. Where a model was evaluated
-  under more than one setting — Gemini Live with and without proactive mode, GPT-Realtime under VAD
-  and SVAD — only the stronger result is listed, and the configuration is named beside it. Table 1
-  below keeps every configuration separately.</p>
-
-  <div class="lb-controls">
-    <div class="seg" id="lb-filter">
-      <button type="button" data-f="all" aria-pressed="true">All</button>
-      <button type="button" data-f="closed" aria-pressed="false">Closed-source</button>
-      <button type="button" data-f="open" aria-pressed="false">Open-weight</button>
-    </div>
-    <span class="hint">Click a column to sort</span>
-  </div>
-
-  <div class="scroll-x">
-    <table class="board" id="board">
-      <thead><tr>
-        <th data-k="name">Model</th>
-        <th data-k="paired" class="sorted">Paired pass rate &#9660;</th>
-        <th data-k="per">Per-instruction</th>
-      </tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="lb-legend">
-    <span class="dot" style="background:#34D399"></span>OpenAI
-    <span class="dot" style="background:#7EA2F5;margin-left:14px"></span>Google
-    <span class="dot" style="background:#B794F6;margin-left:14px"></span>xAI
-    <span class="dot" style="background:#E0883C;margin-left:14px"></span>Open-weight<br>
-    <b style="color:var(--text)">Paired pass rate</b> is the headline metric: a case counts only when
-    the model obeys <i>both</i> contrasting instructions.
-    <b style="color:var(--text)">Per-instruction</b> scores each condition on its own, so it largely
-    reflects a system's default behaviour rather than its responsiveness to instruction.
-  </div>
 
   <h3 class="sub">Every configuration</h3>
   <div class="scroll-x">
@@ -607,6 +581,45 @@
 }</pre>
   </div>
 </section>
+</div>
+
+<div id="view-leaderboard" hidden>
+<section>
+  <h2>Leaderboard</h2>
+  <p>Each system appears once, at its <b>best-scoring configuration</b>. Where a model was evaluated
+  under more than one setting — Gemini Live with and without proactive mode, GPT-Realtime under VAD
+  and SVAD — only the stronger result is listed, and the configuration is named beside it. Every
+  configuration scored separately is in <b>Results</b>, under the Overview tab.</p>
+
+  <div class="lb-controls">
+    <div class="seg" id="lb-filter">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="closed" aria-pressed="false">Closed-source</button>
+      <button type="button" data-f="open" aria-pressed="false">Open-weight</button>
+    </div>
+    <span class="hint">Click a column to sort</span>
+  </div>
+
+  <div class="scroll-x">
+    <table class="board" id="board">
+      <thead><tr>
+        <th data-k="name">Model</th>
+        <th data-k="paired" class="sorted">Paired pass rate &#9660;</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="lb-legend">
+    <span class="dot" style="background:#34D399"></span>OpenAI
+    <span class="dot" style="background:#7EA2F5;margin-left:14px"></span>Google
+    <span class="dot" style="background:#B794F6;margin-left:14px"></span>xAI
+    <span class="dot" style="background:#E0883C;margin-left:14px"></span>Open-weight<br>
+    <b style="color:var(--text)">Paired pass rate</b>: a case counts only when the model obeys
+    <i>both</i> contrasting instructions, so a default that happens to match one side scores nothing.
+  </div>
+</section>
+</div>
 
 <footer>
   Boson AI · <a href="mailto:yuzhi.tang@boson.ai">yuzhi.tang@boson.ai</a>
@@ -628,7 +641,8 @@
 /* ---------- leaderboard: one row per model, best configuration only ---------- */
 (function () {
   var FAM = { openai:'#34D399', google:'#7EA2F5', xai:'#B794F6', open:'#E0883C' };
-  // paired = Table 1 Avg (headline).  per = Figure 4 Avg (default behaviour).
+  // paired = Table 1 Avg (headline).  per = Figure 4 Avg; kept but not shown —
+  // re-add a <th data-k="per"> and a cell(r,'per') call to bring the column back.
   // Models evaluated under several configs keep only their best paired score; cfg names it.
   var LB = [
     { name:'GPT-Live-1',               fam:'openai', open:false, cfg:null,        paired:16.5, per:44.3 },
@@ -645,8 +659,7 @@
     { name:'DuplexCascade',            fam:'open',   open:true,  cfg:null,        paired: 2.1, per:31.1 },
     { name:'Freeze-Omni',              fam:'open',   open:true,  cfg:null,        paired: 1.0, per:20.0 }
   ];
-  var MAX = { paired: Math.max.apply(null, LB.map(function(r){return r.paired;})),
-              per:    Math.max.apply(null, LB.map(function(r){return r.per;})) };
+  var MAX = { paired: Math.max.apply(null, LB.map(function(r){return r.paired;})) };
 
   var sortKey = 'paired', sortDir = -1, filter = 'all';
   var tbody = document.querySelector('#board tbody');
@@ -676,7 +689,7 @@
            + esc(r.name)
            + (r.cfg ? ' <span class="cfg">(' + esc(r.cfg) + ')</span>' : '')
            + (r.open ? '<span class="tag-open">open</span>' : '')
-           + '</td>' + cell(r, 'paired') + cell(r, 'per') + '</tr>';
+           + '</td>' + cell(r, 'paired') + '</tr>';
     }).join('');
 
     document.querySelectorAll('#board th').forEach(function (th) {
@@ -707,6 +720,31 @@
   });
 
   render();
+})();
+
+/* ---------- Overview / Leaderboard views ---------- */
+(function () {
+  var views = { overview: document.getElementById('view-overview'),
+                leaderboard: document.getElementById('view-leaderboard') };
+  var tabs = document.querySelectorAll('#views .tab');
+  if (!views.overview || !views.leaderboard || !tabs.length) return;
+
+  function show(name) {
+    Object.keys(views).forEach(function (k) { views[k].hidden = (k !== name); });
+    tabs.forEach(function (t) {
+      t.setAttribute('aria-pressed', String(t.dataset.view === name));
+    });
+    try { history.replaceState(null, '', name === 'overview' ? location.pathname : '#leaderboard'); }
+    catch (e) {}
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { show(t.dataset.view); });
+  });
+
+  // deep link straight to the board
+  if (location.hash === '#leaderboard') show('leaderboard');
 })();
 </script>
 </body>

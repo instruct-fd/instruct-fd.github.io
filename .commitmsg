@@ -1,21 +1,19 @@
-Adopt the ihbench section scheme and a gentler opening
+Make the leaderboard its own view; drop its per-instruction column
 
-Sections are now What is Instruct-FD?, Scoring, Results and Pipeline,
-with Pipeline last, following the ihbench blog. Numbered kickers are
-gone, since ihbench has none; that also retires the 01-07 numbering
-that no longer matched the poster.
+Overview and Leaderboard are now a segmented tab pair rather than two
+more link pills, styled like the ihbench tabs: the selected one is
+highlighted, Overview by default. They swap which body renders, so the
+Leaderboard tab shows the board alone and nothing else. The hero stays
+in both, since it carries the title, authors and the headline numbers.
 
-The opener becomes the question itself and leads with the concrete
-decision a voice agent makes many times a minute, then the two things
-that have to go right, then what existing full-duplex benchmarks
-measure and what Instruct-FD measures instead.
+#leaderboard still deep-links to the board, and the tab rewrites the
+hash so the view survives a reload.
 
-Scoring is a new section: paired pass rate as the headline, and
-per-instruction as the looser measure, with the gap between them named
-as the informative part.
+The leaderboard keeps paired pass rate only. The per-instruction figures
+stay in the data with a note on how to restore the column; Figure 4 and
+the Scoring section still cover that metric.
 
-Results absorbs the leaderboard, the full configuration table, the
-analysis figures and the failure transcripts as h3 subsections, the way
-ihbench nests its findings under one heading.
+Headline stats go back to four tiles with 1,358 test cases restored
+between scenarios and systems evaluated.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
