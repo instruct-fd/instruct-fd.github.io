@@ -1,0 +1,13 @@
+Hero resource links, trimmed headline stats, drop the Listen section
+
+- Remove the Listen / "Hear the contrast" section and its CSS. The audio
+  demos were never filled in, so the placeholders came out.
+- Author line is no longer bolded on the first author.
+- Hero links become the resource row: Paper v1 (live), plus Paper v1.5,
+  Code and Data marked "soon" as non-links with a dashed border, so a
+  visitor cannot click something that is not there yet.
+- Headline stats drop to three: 679 scenarios, 15 realtime systems
+  evaluated, 16.5% best pass rate. Test-case count stays in the data
+  curation section where it has context.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
