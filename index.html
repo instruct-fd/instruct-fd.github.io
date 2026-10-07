@@ -280,30 +280,16 @@
 <section id="overview">
   <div class="lead-kicker">What is Instruct-FD?</div>
   <h2>Can a full-duplex speech system change its turn-taking behaviour when instructed to?</h2>
-
-  <p>When you talk to a voice agent, it is deciding many times a minute whether to speak: keep
-  listening, drop in a quick “mm-hm”, cut in, carry on, or stop and hand the floor back. Two
-  different things have to go right. It has to make that call well, and it has to make the call
-  <i>you</i> wanted.</p>
-
-  <p>A growing set of full-duplex benchmarks measure the first one — barge-in detection, yield
-  latency, backchannel rate, taking the turn promptly once the user finishes. Each scores a model
-  against a single fixed idea of good turn-taking.</p>
-
-  <p>But there is no one right answer. Both of these are reasonable, and they ask for opposite
-  behaviour at the same moment:</p>
+  <p>Existing full-duplex benchmarks — Full-Duplex-Bench v1 [1], v1.5 [2], FLEXI [3] — test whether a
+  model can produce a <b>fixed</b> turn-taking behaviour at a cue, for instance taking the turn soon
+  after the user finishes a question.</p>
+  <p>The limitation is that a model needs to adjust its turn-taking behaviour based on the
+  conversation and the deployment context:</p>
 
   <div class="quotes">
     <div class="q a">Interrupt me if you hear me making a mistake.</div>
     <div class="q b">Let me finish my thoughts before jumping in.</div>
   </div>
-
-  <p>The same split shows up in deployment: an outbound sales agent needs to be far more forward than
-  an inbound support one. So conformity to one repertoire cannot be the target.</p>
-
-  <p><b>Instruct-FD measures the second one.</b> Given an explicit instruction about how to manage the
-  floor, does the model actually follow it — and would it have behaved differently had you asked for
-  the opposite?</p>
 </section>
 
 <section>
