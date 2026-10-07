@@ -117,15 +117,17 @@
   /* ---------- tables ---------- */
   .scroll-x { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
               border: 1px solid var(--border); border-radius: 14px; margin: 18px 0; min-width: 0; }
-  table.lb { border-collapse: collapse; width: 100%; min-width: 700px; background: var(--surface); }
+  table.lb { border-collapse: collapse; width: 100%; min-width: 750px; background: var(--surface); }
   table.lb th, table.lb td { padding: 9px 11px; text-align: center; font-size: 13px;
                              border-bottom: 1px solid var(--border); }
   table.lb thead th { background: var(--surface2); color: var(--muted); font-size: 11px;
                       text-transform: uppercase; letter-spacing: .05em; font-weight: 700;
                       font-family: var(--display); white-space: nowrap; }
   table.lb td { font-variant-numeric: tabular-nums; color: var(--body); }
-  table.lb td:first-child, table.lb th:first-child { text-align: left; white-space: nowrap;
-      font-weight: 600; color: var(--text); font-size: 13.5px; }
+  table.lb .rank { text-align: center; color: var(--muted); font-weight: 700;
+      font-size: 12.5px; width: 1%; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.lb .model { text-align: left; white-space: nowrap; font-weight: 600;
+      color: var(--text); font-size: 13.5px; }
   table.lb tbody tr:last-child td { border-bottom: none; }
   table.lb tr.grp td { background: var(--bg); color: var(--green); font-size: 10.5px;
       text-transform: uppercase; letter-spacing: .07em; font-weight: 700;
@@ -303,28 +305,28 @@
   <div class="scroll-x">
   <table class="lb">
     <thead>
-      <tr><th rowspan="2">Model</th><th colspan="5">Cue type</th><th colspan="4">Contrast</th><th rowspan="2" class="avg">Avg</th></tr>
+      <tr><th rowspan="2" class="rank">Rank</th><th rowspan="2" class="model">Model</th><th colspan="5">Cue type</th><th colspan="4">Contrast</th><th rowspan="2" class="avg">Avg</th></tr>
       <tr><th>Ling.</th><th>Spk.</th><th>Snd.</th><th>Para.</th><th>Temp.</th>
           <th>T/S</th><th>T/B</th><th>B/S</th><th>Y/C</th></tr>
     </thead>
     <tbody>
-      <tr class="grp"><td colspan="11">Closed-source systems</td></tr>
-      <tr><td>GPT-Live-1</td><td class="b1">13.9</td><td class="b1">10.9</td><td class="b1">6.2</td><td class="b1">19.2</td><td class="b1">35.0</td><td class="b1">12.6</td><td class="b2">5.8</td><td class="b1">40.1</td><td class="b2">9.6</td><td class="avg b1">16.5</td></tr>
-      <tr><td>Gemini Live 2.5 Flash (proactive)</td><td>1.3</td><td>0.7</td><td>0.8</td><td>9.6</td><td class="b2">29.2</td><td class="b2">7.7</td><td>4.6</td><td>15.3</td><td>3.0</td><td class="avg b2">7.5</td></tr>
-      <tr><td>Gemini Live 2.5 Flash</td><td>1.9</td><td>5.4</td><td>0.0</td><td class="b2">10.4</td><td>21.7</td><td>4.4</td><td>5.2</td><td class="b2">15.9</td><td>4.8</td><td class="avg">7.4</td></tr>
-      <tr><td>Grok Voice Think-Fast 2.0</td><td>0.0</td><td>0.0</td><td>0.8</td><td>1.6</td><td>15.8</td><td>0.0</td><td class="b1">9.8</td><td>0.6</td><td>2.4</td><td class="avg">3.2</td></tr>
-      <tr><td>GPT-Realtime (VAD)</td><td>1.3</td><td>0.7</td><td>0.8</td><td>2.4</td><td>9.2</td><td>0.0</td><td>6.4</td><td>1.9</td><td>2.4</td><td class="avg">2.7</td></tr>
-      <tr><td>GPT-Realtime (SVAD)</td><td>0.0</td><td>0.0</td><td>0.8</td><td>3.2</td><td>6.7</td><td>0.5</td><td>3.5</td><td>1.9</td><td>1.8</td><td class="avg">1.9</td></tr>
-      <tr class="grp"><td colspan="11">Open-weight systems</td></tr>
-      <tr><td>Lychee-FD</td><td class="b2">6.3</td><td class="b2">9.5</td><td>2.3</td><td>4.8</td><td>9.2</td><td>1.6</td><td>0.6</td><td>10.2</td><td class="b1">14.4</td><td class="avg">6.5</td></tr>
-      <tr><td>MiniCPM-o 4.5</td><td>5.1</td><td>7.5</td><td class="b2">3.9</td><td>2.4</td><td>3.3</td><td>7.1</td><td>2.3</td><td>0.6</td><td>7.8</td><td class="avg">4.6</td></tr>
-      <tr><td>PersonaPlex</td><td>4.4</td><td>4.1</td><td class="b2">3.9</td><td>2.4</td><td>4.2</td><td>0.0</td><td>2.3</td><td>3.8</td><td>9.6</td><td class="avg">3.8</td></tr>
-      <tr><td>Moshi</td><td>3.2</td><td>4.8</td><td class="b2">4.7</td><td>4.0</td><td>1.7</td><td>0.0</td><td>0.6</td><td>10.8</td><td>4.2</td><td class="avg">3.7</td></tr>
-      <tr><td>Moshi-RL</td><td>1.9</td><td>4.8</td><td>2.3</td><td>3.2</td><td>4.2</td><td>0.5</td><td>5.2</td><td>1.9</td><td>5.4</td><td class="avg">3.2</td></tr>
-      <tr><td>PersonaPlex-RL</td><td>3.8</td><td>4.1</td><td>3.9</td><td>0.8</td><td>1.7</td><td>0.5</td><td>2.3</td><td>1.3</td><td>7.8</td><td class="avg">2.9</td></tr>
-      <tr><td>Nemotron-VoiceChat-11B</td><td>1.9</td><td>4.1</td><td>0.8</td><td>2.4</td><td>2.5</td><td>0.5</td><td>0.6</td><td>1.9</td><td>6.6</td><td class="avg">2.4</td></tr>
-      <tr><td>DuplexCascade</td><td>1.9</td><td>2.0</td><td>0.0</td><td>4.8</td><td>1.7</td><td>0.5</td><td>0.0</td><td>1.9</td><td>6.0</td><td class="avg">2.1</td></tr>
-      <tr><td>Freeze-Omni</td><td>0.6</td><td>2.7</td><td>0.8</td><td>0.0</td><td>0.8</td><td>2.7</td><td>0.0</td><td>0.0</td><td>1.2</td><td class="avg">1.0</td></tr>
+      <tr class="grp"><td colspan="12">Closed-source systems</td></tr>
+      <tr><td class="rank">1</td><td class="model">GPT-Live-1</td><td class="b1">13.9</td><td class="b1">10.9</td><td class="b1">6.2</td><td class="b1">19.2</td><td class="b1">35.0</td><td class="b1">12.6</td><td class="b2">5.8</td><td class="b1">40.1</td><td class="b2">9.6</td><td class="avg b1">16.5</td></tr>
+      <tr><td class="rank">2</td><td class="model">Gemini Live 2.5 Flash (proactive)</td><td>1.3</td><td>0.7</td><td>0.8</td><td>9.6</td><td class="b2">29.2</td><td class="b2">7.7</td><td>4.6</td><td>15.3</td><td>3.0</td><td class="avg b2">7.5</td></tr>
+      <tr><td class="rank">3</td><td class="model">Gemini Live 2.5 Flash</td><td>1.9</td><td>5.4</td><td>0.0</td><td class="b2">10.4</td><td>21.7</td><td>4.4</td><td>5.2</td><td class="b2">15.9</td><td>4.8</td><td class="avg">7.4</td></tr>
+      <tr><td class="rank">8</td><td class="model">Grok Voice Think-Fast 2.0</td><td>0.0</td><td>0.0</td><td>0.8</td><td>1.6</td><td>15.8</td><td>0.0</td><td class="b1">9.8</td><td>0.6</td><td>2.4</td><td class="avg">3.2</td></tr>
+      <tr><td class="rank">11</td><td class="model">GPT-Realtime (VAD)</td><td>1.3</td><td>0.7</td><td>0.8</td><td>2.4</td><td>9.2</td><td>0.0</td><td>6.4</td><td>1.9</td><td>2.4</td><td class="avg">2.7</td></tr>
+      <tr><td class="rank">14</td><td class="model">GPT-Realtime (SVAD)</td><td>0.0</td><td>0.0</td><td>0.8</td><td>3.2</td><td>6.7</td><td>0.5</td><td>3.5</td><td>1.9</td><td>1.8</td><td class="avg">1.9</td></tr>
+      <tr class="grp"><td colspan="12">Open-weight systems</td></tr>
+      <tr><td class="rank">4</td><td class="model">Lychee-FD</td><td class="b2">6.3</td><td class="b2">9.5</td><td>2.3</td><td>4.8</td><td>9.2</td><td>1.6</td><td>0.6</td><td>10.2</td><td class="b1">14.4</td><td class="avg">6.5</td></tr>
+      <tr><td class="rank">5</td><td class="model">MiniCPM-o 4.5</td><td>5.1</td><td>7.5</td><td class="b2">3.9</td><td>2.4</td><td>3.3</td><td>7.1</td><td>2.3</td><td>0.6</td><td>7.8</td><td class="avg">4.6</td></tr>
+      <tr><td class="rank">6</td><td class="model">PersonaPlex</td><td>4.4</td><td>4.1</td><td class="b2">3.9</td><td>2.4</td><td>4.2</td><td>0.0</td><td>2.3</td><td>3.8</td><td>9.6</td><td class="avg">3.8</td></tr>
+      <tr><td class="rank">7</td><td class="model">Moshi</td><td>3.2</td><td>4.8</td><td class="b2">4.7</td><td>4.0</td><td>1.7</td><td>0.0</td><td>0.6</td><td>10.8</td><td>4.2</td><td class="avg">3.7</td></tr>
+      <tr><td class="rank">8</td><td class="model">Moshi-RL</td><td>1.9</td><td>4.8</td><td>2.3</td><td>3.2</td><td>4.2</td><td>0.5</td><td>5.2</td><td>1.9</td><td>5.4</td><td class="avg">3.2</td></tr>
+      <tr><td class="rank">10</td><td class="model">PersonaPlex-RL</td><td>3.8</td><td>4.1</td><td>3.9</td><td>0.8</td><td>1.7</td><td>0.5</td><td>2.3</td><td>1.3</td><td>7.8</td><td class="avg">2.9</td></tr>
+      <tr><td class="rank">12</td><td class="model">Nemotron-VoiceChat-11B</td><td>1.9</td><td>4.1</td><td>0.8</td><td>2.4</td><td>2.5</td><td>0.5</td><td>0.6</td><td>1.9</td><td>6.6</td><td class="avg">2.4</td></tr>
+      <tr><td class="rank">13</td><td class="model">DuplexCascade</td><td>1.9</td><td>2.0</td><td>0.0</td><td>4.8</td><td>1.7</td><td>0.5</td><td>0.0</td><td>1.9</td><td>6.0</td><td class="avg">2.1</td></tr>
+      <tr><td class="rank">15</td><td class="model">Freeze-Omni</td><td>0.6</td><td>2.7</td><td>0.8</td><td>0.0</td><td>0.8</td><td>2.7</td><td>0.0</td><td>0.0</td><td>1.2</td><td class="avg">1.0</td></tr>
     </tbody>
   </table>
   </div>

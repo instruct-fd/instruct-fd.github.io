@@ -1,0 +1,17 @@
+Add a Rank column to Table 1
+
+Rank is global across all 15 system configurations, ordered by Avg, not
+per-group. The rows stay split into closed-source and open-weight, so
+the ranks run non-monotonically within each block — which is the point:
+it shows Lychee-FD at 4 ahead of Grok, both GPT-Realtime configs and
+everything below them.
+
+Standard competition ranking, so the 3.2 tie between Grok Voice and
+Moshi-RL shares rank 8 and the next rank is 10. Ranks are derived from
+the Avg cells rather than written by hand.
+
+Alignment now keys off .rank and .model classes instead of :first-child,
+which would otherwise have left-aligned the rank numbers and the second
+header row's "Spk." cell.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
