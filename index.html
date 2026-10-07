@@ -242,6 +242,12 @@
   <h2>Which floor action, at which cue</h2>
   <p>Every turn-taking instruction specifies <b>which floor action</b> to take at <b>which cue</b>.</p>
 
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig1_taxonomy.png" alt="Overview of the Instruct-FD benchmark taxonomy across the five cue categories, each showing a contrastive instruction pair with example good model responses."></div>
+    <div class="cap"><b>Figure 1.</b> Overview of the Instruct-FD benchmark taxonomy. Each case shows
+    the contrastive instruction pair with example good model responses.</div>
+  </div>
+
   <h3>Five cue categories</h3>
   <div class="cards">
     <div class="type-card"><div class="type-name">Temporal</div><div class="type-desc">Silence and timing — a mid-utterance pause, or how long an overlap lasts.</div></div>
@@ -251,18 +257,9 @@
     <div class="type-card"><div class="type-name">Speaker attribution</div><div class="type-desc">Who is speaking — a second voice joining, or a remark addressed to someone else.</div></div>
   </div>
 
-  <h3>Five floor actions</h3>
-  <div class="chips">
-    <span class="chip">Take turn</span><span class="chip">Backchannel</span><span class="chip">Silent</span>
-    <span class="chip">Yield</span><span class="chip">Continue</span>
-  </div>
-
-  <h3>One caveat, and the design that removes it</h3>
-  <p>A model's <b>default</b> behaviour can confound instruction following — an eager model always
-  takes the floor because it always does, not because it was instructed to.</p>
-  <p><b>Our design: scenario-controlled contrastive evaluation.</b> One scenario, two contrastive
-  instructions prescribing different floor actions at the same cue. A case passes only if the model
-  performs the instructed action under <b>both</b>.</p>
+  <h3>Scenario-controlled contrastive evaluation</h3>
+  <p>One scenario, two contrastive instructions prescribing different floor actions at the same cue.
+  A case passes only if the model performs the instructed action under <b>both</b>.</p>
 
   <h3>Four contrastive instruction pairs</h3>
   <div class="chips">
@@ -271,17 +268,10 @@
     <span class="chip"><b>B/S</b> &nbsp;Backchannel vs Silent</span>
     <span class="chip"><b>Y/C</b> &nbsp;Yield vs Continue</span>
   </div>
-
-  <div class="figure">
-    <div class="plate"><img src="static/figures/fig1_taxonomy.png" alt="Overview of the Instruct-FD benchmark taxonomy across the five cue categories, each showing a contrastive instruction pair with example good model responses."></div>
-    <div class="cap"><b>Figure 1.</b> Overview of the Instruct-FD benchmark taxonomy. Each case shows
-    the contrastive instruction pair with example good model responses.</div>
-  </div>
 </section>
 
 <section>
   <div class="lead-kicker">03 — Data curation</div>
-  <h2>679 scenarios, every cell covered</h2>
   <p>Human-authored seeds cover every cue × instruction-contrast cell; an LLM expands them with new
   scenarios. Final cases are human-reviewed.</p>
 
@@ -306,28 +296,8 @@
   </div>
 </section>
 
-<section>
-  <div class="lead-kicker">04 — Inference harness and judge</div>
-  <h2>Identical audio, two instructions</h2>
-  <p><b>VAD-driven scripted user.</b> The scripted user takes the turn, barges in, or yields based on
-  each test case's stream logic. The same pre-recorded user audio drives both instruction variants,
-  so the instruction is the only thing that differs between the two runs.</p>
-  <p><b>Judge reliability.</b> Claude-Sonnet-5 scores each session from the aligned transcript,
-  ground-truth user turns, instruction and criteria. It obtains <b>95.6% accuracy</b>
-  (<i>κ</i> = 0.91) on 816 human-annotated sessions, and <b>97.0% agreement</b> across three
-  LLM judges.</p>
-
-  <div class="figure">
-    <div class="plate"><img src="static/figures/fig3_harness.png" alt="The inference harness and evaluation pipeline, from scripted user through the full-duplex bus to forced alignment and the LLM judge."></div>
-    <div class="cap"><b>Figure 3.</b> (a) Inference: identical pre-recorded user audio with two
-    instruction variants drives a scripted user whose VAD tracks model speech to time user turns,
-    producing a 2-channel WAV per variant. (b) Evaluation: forced alignment feeds an LLM judge, which
-    returns a verdict per variant — the case passes only if both variants pass.</div>
-  </div>
-</section>
-
 <section id="results">
-  <div class="lead-kicker">05 — Main results</div>
+  <div class="lead-kicker">04 — Main results</div>
   <h2>No system reliably follows turn-taking instructions</h2>
 
   <div class="scroll-x">
@@ -372,7 +342,7 @@
 </section>
 
 <section>
-  <div class="lead-kicker">06 — Analysis</div>
+  <div class="lead-kicker">05 — Analysis</div>
   <h2>What the systems are actually doing</h2>
 
   <p class="claim">Per-instruction pass rates reveal each system's default turn-taking behaviour.</p>
@@ -437,7 +407,7 @@
 </section>
 
 <section id="failures">
-  <div class="lead-kicker">07 — What model failure looks like</div>
+  <div class="lead-kicker">06 — What model failure looks like</div>
   <h2>Five sessions, five failure modes</h2>
   <p>Timestamps are seconds on the shared session clock; overlapping ranges mean both channels are
   active.</p>
