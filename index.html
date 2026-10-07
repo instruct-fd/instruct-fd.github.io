@@ -268,31 +268,43 @@
 </header>
 
 <section id="overview">
-  <div class="lead-kicker">01 — Motivation</div>
-  <h2>A fixed repertoire is the wrong target</h2>
-  <p>Existing full-duplex benchmarks — Full-Duplex-Bench v1 [1], v1.5 [2], FLEXI [3] — test whether a
-  model can produce a <b>fixed</b> turn-taking behaviour at a cue, for instance taking the turn soon
-  after the user finishes a question.</p>
-  <p>The limitation is that a model needs to adjust its turn-taking behaviour based on the
-  conversation and the deployment context:</p>
+  <h2>Can a full-duplex speech system change its turn-taking behaviour when instructed to?</h2>
+
+  <p>When you talk to a voice agent, it is deciding many times a minute whether to speak: keep
+  listening, drop in a quick “mm-hm”, cut in, carry on, or stop and hand the floor back. Two
+  different things have to go right. It has to make that call well, and it has to make the call
+  <i>you</i> wanted.</p>
+
+  <p>A growing set of full-duplex benchmarks measure the first one — barge-in detection, yield
+  latency, backchannel rate, taking the turn promptly once the user finishes. Each scores a model
+  against a single fixed idea of good turn-taking.</p>
+
+  <p>But there is no one right answer. Both of these are reasonable, and they ask for opposite
+  behaviour at the same moment:</p>
 
   <div class="quotes">
     <div class="q a">Interrupt me if you hear me making a mistake.</div>
     <div class="q b">Let me finish my thoughts before jumping in.</div>
   </div>
 
-  <p class="claim">We ask: can a full-duplex speech system change its turn-taking behaviour when
-  instructed to?</p>
+  <p>The same split shows up in deployment: an outbound sales agent needs to be far more forward than
+  an inbound support one. So conformity to one repertoire cannot be the target.</p>
+
+  <p><b>Instruct-FD measures the second one.</b> Given an explicit instruction about how to manage the
+  floor, does the model actually follow it — and would it have behaved differently had you asked for
+  the opposite?</p>
 </section>
 
 <section>
-  <div class="lead-kicker">02 — Benchmark taxonomy</div>
-  <h2>Which floor action, at which cue</h2>
-  <p>Every turn-taking instruction specifies <b>which floor action</b> to take at <b>which cue</b>.</p>
+  <h2>What is Instruct-FD?</h2>
+  <p>Every turn-taking instruction specifies <b>which floor action</b> to take at <b>which cue</b>.
+  Instruct-FD pairs each scenario with two instructions that demand different actions at the same
+  cue, so a model only scores by responding to the instruction rather than to the moment.</p>
 
   <h3>Scenario-controlled contrastive evaluation</h3>
-  <p>One scenario, two contrastive instructions prescribing different floor actions at the same cue.
-  A case passes only if the model performs the instructed action under <b>both</b>.</p>
+  <p>A model's default behaviour can masquerade as instruction following — an eager model takes the
+  floor because it always does, not because it was told to. So each case fixes one scenario and runs
+  it twice under contrasting instructions. The audio is identical; only the instruction changes.</p>
 
   <div class="figure">
     <div class="plate"><img src="static/figures/fig1_taxonomy.png" alt="Overview of the Instruct-FD benchmark taxonomy across the five cue categories, each showing a contrastive instruction pair with example good model responses."></div>
@@ -319,34 +331,20 @@
 </section>
 
 <section>
-  <div class="lead-kicker">03 — Data curation</div>
-  <p>Human-authored seeds cover every cue × instruction-contrast cell; an LLM expands them with new
-  scenarios. Final cases are human-reviewed.</p>
+  <h2>Scoring</h2>
+  <p><b>Paired pass rate</b> is the headline metric. A case counts as passed only when the model
+  produces the prescribed behaviour under <b>both</b> instructions. Getting one side right and the
+  other wrong scores zero, which is what separates genuine instruction following from a default that
+  happens to match one of the two.</p>
 
-  <div class="stats">
-    <div class="stat"><div class="stat-num">679</div><div class="stat-label">scenarios</div></div>
-    <div class="stat"><div class="stat-num">1,358</div><div class="stat-label">test cases</div></div>
-    <div class="stat"><div class="stat-num">334</div><div class="stat-label">dyadic</div></div>
-    <div class="stat"><div class="stat-num">345</div><div class="stat-label">multi-party</div></div>
-  </div>
-
-  <div class="figure">
-    <div class="plate"><img src="static/figures/fig_breakdown.png" alt="Scenario counts by cue category and by instruction contrast."></div>
-    <div class="cap">Scenario breakdown by cue category and by instruction contrast.</div>
-  </div>
-
-  <div class="figure">
-    <div class="plate"><img src="static/figures/fig2_curation.png" alt="The four-stage data curation pipeline: taxonomy and human seeds, LLM augmentation with screening, TTS rendering, and human review."></div>
-    <div class="cap"><b>Figure 2.</b> Data curation. Human-authored seed cases per instruction-contrast
-    × cue cell, LLM augmentation with structural and validity screening, TTS rendering with speaker
-    identity and paralinguistic control mixed with ESC-50 sound events, then human verification on
-    the generated user audio.</div>
-  </div>
+  <p><b>Per-instruction pass rate</b> scores each condition on its own, ignoring its partner. It is
+  the looser measure, and the gap between the two is informative: a system can score well
+  per-instruction simply by always staying silent, and still score near zero paired.</p>
 </section>
 
 <section id="leaderboard">
-  <div class="lead-kicker">04 — Leaderboard</div>
-  <h2>One score per model</h2>
+  <h2>Results</h2>
+
   <p>Each system appears once, at its <b>best-scoring configuration</b>. Where a model was evaluated
   under more than one setting — Gemini Live with and without proactive mode, GPT-Realtime under VAD
   and SVAD — only the stronger result is listed, and the configuration is named beside it. Table 1
@@ -382,12 +380,8 @@
     <b style="color:var(--text)">Per-instruction</b> scores each condition on its own, so it largely
     reflects a system's default behaviour rather than its responsiveness to instruction.
   </div>
-</section>
 
-<section id="results">
-  <div class="lead-kicker">05 — Main results</div>
-  <h2>No system reliably follows turn-taking instructions</h2>
-
+  <h3 class="sub">Every configuration</h3>
   <div class="scroll-x">
   <table class="lb">
     <thead>
@@ -427,11 +421,8 @@
     <li><span class="finding-lead">11 of 15 system configurations fall below 6%.</span>
       Instructed turn-taking is close to unsolved across the board, open and closed alike.</li>
   </ul>
-</section>
 
-<section>
-  <div class="lead-kicker">06 — Analysis</div>
-  <h2>What the systems are actually doing</h2>
+  <h3 class="sub">What the systems are actually doing</h3>
 
   <p class="claim">Per-instruction pass rates reveal each system's default turn-taking behaviour.</p>
 
@@ -492,12 +483,9 @@
     paired pass rate — the gain comes from backchannelling more often, including when told to stay
     silent.</div>
   </div>
-</section>
 
-<section id="failures">
-  <div class="lead-kicker">07 — What model failure looks like</div>
-  <h2>Five sessions, five failure modes</h2>
-  <p>Timestamps are seconds on the shared session clock; overlapping ranges mean both channels are
+  <h3 class="sub">What model failure looks like</h3>
+  <p>Five sessions, one per failure mode.Timestamps are seconds on the shared session clock; overlapping ranges mean both channels are
   active.</p>
 
   <div class="tr">
@@ -556,6 +544,32 @@
     <div class="ln u"><span class="t">0:29.0–0:34.9</span><span class="w">Oskar</span><span class="s">Naledi — sorry, quick thing, did the answer sheets ever get printed? The double-sided ones.</span></div>
     <div class="ln m"><span class="t">0:36.4–0:38.5</span><span class="w">Model</span><span class="s">No problem. I'll pause for now.</span></div>
     <div class="fail">Model fails to continue when users talk among themselves.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Pipeline</h2>
+  <p>Human-authored seeds cover every cue × instruction-contrast cell; an LLM expands them with new
+  scenarios. Final cases are human-reviewed.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">679</div><div class="stat-label">scenarios</div></div>
+    <div class="stat"><div class="stat-num">1,358</div><div class="stat-label">test cases</div></div>
+    <div class="stat"><div class="stat-num">334</div><div class="stat-label">dyadic</div></div>
+    <div class="stat"><div class="stat-num">345</div><div class="stat-label">multi-party</div></div>
+  </div>
+
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig_breakdown.png" alt="Scenario counts by cue category and by instruction contrast."></div>
+    <div class="cap">Scenario breakdown by cue category and by instruction contrast.</div>
+  </div>
+
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig2_curation.png" alt="The four-stage data curation pipeline: taxonomy and human seeds, LLM augmentation with screening, TTS rendering, and human review."></div>
+    <div class="cap"><b>Figure 2.</b> Data curation. Human-authored seed cases per instruction-contrast
+    × cue cell, LLM augmentation with structural and validity screening, TTS rendering with speaker
+    identity and paralinguistic control mixed with ESC-50 sound events, then human verification on
+    the generated user audio.</div>
   </div>
 </section>
 

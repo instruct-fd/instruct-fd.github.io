@@ -1,24 +1,21 @@
-Add a model-level leaderboard; swap the hero nav links
+Adopt the ihbench section scheme and a gentler opening
 
-Hero drops Results and Failure cases in favour of Overview (anchored on
-the existing Motivation section) and Leaderboard.
+Sections are now What is Instruct-FD?, Scoring, Results and Pipeline,
+with Pipeline last, following the ihbench blog. Numbered kickers are
+gone, since ihbench has none; that also retires the 01-07 numbering
+that no longer matched the poster.
 
-The leaderboard reports one row per model rather than per configuration.
-Where a model ran under several settings, only its best paired pass rate
-is listed and the configuration is named beside it: Gemini Live 2.5
-Flash keeps proactive (7.5 over 7.4) and GPT-Realtime keeps VAD (2.7
-over 1.9). That takes 15 configurations down to 13 models. Table 1 still
-carries every configuration.
+The opener becomes the question itself and leads with the concrete
+decision a voice agent makes many times a minute, then the two things
+that have to go right, then what existing full-duplex benchmarks
+measure and what Instruct-FD measures instead.
 
-The -RL variants stay as separate rows. Interaction RL post-training
-produces different weights rather than a different inference setting, so
-Moshi/Moshi-RL and PersonaPlex/PersonaPlex-RL are not the same model
-under two configs.
+Scoring is a new section: paired pass rate as the headline, and
+per-instruction as the looser measure, with the gap between them named
+as the informative part.
 
-Styling follows the ihbench leaderboard: sortable columns, family colour
-dots, inline proportional bars with the number at the end, and a
-segmented All / Closed-source / Open-weight filter. Second metric is the
-per-instruction average from Figure 4, which mostly reflects default
-behaviour rather than instruction following.
+Results absorbs the leaderboard, the full configuration table, the
+analysis figures and the failure transcripts as h3 subsections, the way
+ihbench nests its findings under one heading.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
