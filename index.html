@@ -4,220 +4,231 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Instruct-FD</title>
-<meta name="description" content="Instruct-FD: a benchmark asking whether full-duplex speech systems can follow turn-taking instructions. The best of 15 system configurations passes only 16.5% of cases.">
+<meta name="description" content="A benchmark asking whether full-duplex speech systems can follow turn-taking instructions. The best of 15 system configurations passes only 16.5% of cases.">
 <meta property="og:title" content="Instruct-FD">
 <meta property="og:description" content="Can your full-duplex speech system follow turn-taking instructions? The best of 15 system configurations reaches only 16.5%.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#fafbfc; --panel:#fff; --ink:#0c1015; --dim:#5b6572; --line:#e3e7ec;
-    --blue:#1a74d0; --blue-w:#e8f1fb; --green:#0e8f54; --orange:#d97112; --red:#d63f3c;
-    --violet:#6a4bc4;
-    --t-user:#1c5fa8; --t-model:#b8560a; --t-fail:#d63f3c;
-    --mono:ui-monospace,SFMono-Regular,"DM Mono",Menlo,monospace;
-    --maxw:900px;
+  /* Layout: single 820px reading column on near-black; poster figures sit in light cards
+     so their own green palette reads as drawn. Committed dark single-theme, matching
+     the Boson AI blog. */
+  :root {
+    --bg: #0e1214; --surface: #161a1d; --surface2: #1b2024;
+    --border: #2a3137; --text: #f5f7f8; --muted: #9aa6ad; --body: #d7dde0;
+    --green: #34D399; --green-dim: rgba(52,211,153,0.15);
+    --red: #f87171; --amber: #e0883c;
+    --display: 'Manrope', system-ui, sans-serif;
+    --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+    color-scheme: dark;
   }
-  @media (prefers-color-scheme:dark){
-    :root:not([data-theme="light"]){
-      --bg:#0c1015;--panel:#151b22;--ink:#e9edf2;--dim:#98a4b3;--line:#252d37;
-      --blue:#5aa2e8;--blue-w:#16283d;--green:#3cb87c;--orange:#e89545;--red:#e86b68;
-      --violet:#9b83e0;--t-user:#7db4ec;--t-model:#f0aa55;--t-fail:#e86b68;
-    }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--sans); font-size: 16px; line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
   }
-  :root[data-theme="dark"]{
-    --bg:#0c1015;--panel:#151b22;--ink:#e9edf2;--dim:#98a4b3;--line:#252d37;
-    --blue:#5aa2e8;--blue-w:#16283d;--green:#3cb87c;--orange:#e89545;--red:#e86b68;
-    --violet:#9b83e0;--t-user:#7db4ec;--t-model:#f0aa55;--t-fail:#e86b68;
+  .wrap { max-width: 820px; margin: 0 auto; padding-inline: 20px; }
+  h1, h2, h3, h4 { font-family: var(--display); line-height: 1.2; text-wrap: balance; }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p { margin: 12px 0; color: var(--body); }
+  :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; border-radius: 4px; }
+
+  /* ---------- hero ---------- */
+  .hero { padding-block: 56px 10px; }
+  .hero h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 800; margin: 0 0 16px;
+             letter-spacing: -.02em; }
+  .hero h1 .nm { color: var(--green); }
+  .authors { font-size: 14.5px; color: var(--body); line-height: 1.75; margin: 0 0 8px; }
+  .authors b { color: var(--text); font-weight: 600; }
+  .contact { font-size: 14px; color: var(--muted); margin: 0 0 18px; }
+  .logo { height: 24px; width: auto; opacity: .92; margin-bottom: 22px; display: block; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
+  .pill-link { border: 1px solid var(--border); background: var(--surface);
+               border-radius: 999px; padding: 9px 20px; font-size: 14px; font-weight: 600;
+               color: var(--text); transition: .15s; display: inline-flex; align-items: center; gap: 8px; }
+  .pill-link:hover { border-color: var(--green); color: var(--green); text-decoration: none; }
+  .pill-link svg { width: 14px; height: 14px; flex: none; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 8px; }
+  @media (max-width: 620px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+          padding: 16px 12px; text-align: center; }
+  .stat-num { font-family: var(--display); font-size: 30px; font-weight: 800; color: var(--green);
+              line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat-num.bad { color: var(--red); }
+  .stat-label { font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.35; }
+
+  /* ---------- sections ---------- */
+  section { padding-block: 34px; border-top: 1px solid var(--border); }
+  .lead-kicker { color: var(--green); font-weight: 700; font-size: 12.5px; letter-spacing: .09em;
+                 text-transform: uppercase; font-family: var(--display); margin-bottom: 6px; }
+  section h2 { font-size: 26px; font-weight: 700; margin: 0 0 4px; letter-spacing: -.015em; }
+  section h3 { font-size: 19px; font-weight: 700; margin: 30px 0 6px; color: var(--text); }
+  .claim { font-family: var(--display); font-size: 20px; font-weight: 700; color: var(--green);
+           margin: 20px 0 10px; line-height: 1.35; }
+
+  .quotes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
+  @media (max-width: 620px) { .quotes { grid-template-columns: 1fr; } }
+  .q { background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+       padding: 15px 17px; font-size: 15px; line-height: 1.55; color: var(--body); font-style: italic; }
+  .q.a { border-left: 3px solid var(--green); }
+  .q.b { border-left: 3px solid var(--amber); }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 18px 0; }
+  .type-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+  .type-name { font-family: var(--display); font-weight: 700; color: var(--green); margin-bottom: 5px; font-size: 15px; }
+  .type-desc { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; margin: 16px 0; }
+  .chip { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+          padding: 8px 14px; font-size: 14px; color: var(--body); font-weight: 500; }
+  .chip b { color: var(--green); font-family: var(--display); }
+
+  ul.findings { list-style: none; padding: 0; margin: 18px 0; }
+  ul.findings li { background: var(--surface); border: 1px solid var(--border);
+                   border-left: 3px solid var(--green); border-radius: 10px;
+                   padding: 14px 18px; margin-bottom: 12px; font-size: 15px; color: var(--body); }
+  .finding-lead { font-weight: 700; color: var(--text); display: block; margin-bottom: 3px;
+                  font-family: var(--display); }
+
+  /* ---------- figures ---------- */
+  .figure { background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 16px; margin: 24px 0; }
+  .figure .plate { background: #fff; border-radius: 10px; padding: 14px; }
+  .figure img { display: block; width: 100%; height: auto; max-width: 100%; }
+  .figure .cap { font-size: 13px; color: var(--muted); margin-top: 12px; line-height: 1.6; }
+  .figure .cap b { color: var(--text); font-weight: 600; }
+
+  /* ---------- tables ---------- */
+  .scroll-x { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+              border: 1px solid var(--border); border-radius: 14px; margin: 18px 0; min-width: 0; }
+  table.lb { border-collapse: collapse; width: 100%; min-width: 700px; background: var(--surface); }
+  table.lb th, table.lb td { padding: 9px 11px; text-align: center; font-size: 13px;
+                             border-bottom: 1px solid var(--border); }
+  table.lb thead th { background: var(--surface2); color: var(--muted); font-size: 11px;
+                      text-transform: uppercase; letter-spacing: .05em; font-weight: 700;
+                      font-family: var(--display); white-space: nowrap; }
+  table.lb td { font-variant-numeric: tabular-nums; color: var(--body); }
+  table.lb td:first-child, table.lb th:first-child { text-align: left; white-space: nowrap;
+      font-weight: 600; color: var(--text); font-size: 13.5px; }
+  table.lb tbody tr:last-child td { border-bottom: none; }
+  table.lb tr.grp td { background: var(--bg); color: var(--green); font-size: 10.5px;
+      text-transform: uppercase; letter-spacing: .07em; font-weight: 700;
+      text-align: left; font-family: var(--display); }
+  .b1 { color: var(--green); font-weight: 700; }
+  .b2 { text-decoration: underline; text-underline-offset: 3px; }
+  td.avg { border-left: 1px solid var(--border); font-weight: 700; color: var(--text); }
+  .scroll-hint { display: none; }
+  @media (max-width: 700px) {
+    .scroll-hint { display: block; text-align: right; font-size: 11px; color: var(--green); margin-top: -8px; }
   }
-  *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-  body{margin:0;background:var(--bg);color:var(--ink);
-       font:16px/1.65 -apple-system,BlinkMacSystemFont,"Inter",system-ui,sans-serif;
-       padding:0 16px}
-  a{color:var(--blue)}
-  .wrap{max-width:var(--maxw);margin:0 auto}
 
-  header{padding:52px 0 8px;text-align:center}
-  h1{font-size:clamp(25px,4.2vw,36px);line-height:1.22;margin:0 0 10px;
-     font-weight:680;letter-spacing:-.02em}
-  h1 .nm{color:var(--blue)}
-  .sub{font-size:clamp(14.5px,2vw,17px);color:var(--dim);margin:0 auto 24px;
-       max-width:680px;line-height:1.45;font-weight:450}
-  .authors{font-size:14.5px;margin:0 0 7px;line-height:1.75;color:var(--ink)}
-  .authors .me{font-weight:650}
-  .affil{font-size:13.5px;color:var(--dim);margin:0 0 7px}
-  .affil a{color:var(--dim)}
-  .logo{height:26px;width:auto;opacity:.9;margin:4px 0 18px}
+  /* ---------- transcripts ---------- */
+  .tr { background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+        padding: 17px 19px; margin: 16px 0; }
+  .tr-h { font-family: var(--display); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .tr-m { font-size: 11px; color: var(--muted); font-family: var(--display); font-weight: 600;
+          margin-bottom: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .ln { display: grid; grid-template-columns: 96px 66px 1fr; gap: 10px; padding: 7px 0;
+        font-size: 13.5px; line-height: 1.55; border-top: 1px solid var(--border); min-width: 0; }
+  .ln:first-of-type { border-top: none; }
+  @media (max-width: 620px) { .ln { grid-template-columns: 1fr; gap: 2px; } }
+  .ln .t { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 3px; }
+  .ln .w { font-weight: 700; font-size: 12.5px; font-family: var(--display); }
+  .ln.u .w { color: var(--green); }
+  .ln.m .w { color: var(--amber); }
+  .ln .s { color: var(--body); min-width: 0; }
+  .ln .s b { color: var(--text); }
+  .fail { background: rgba(248,113,113,.10); border: 1px solid rgba(248,113,113,.35);
+          border-radius: 9px; padding: 8px 13px; margin: 9px 0 2px;
+          font-size: 13.5px; font-weight: 600; color: var(--red); }
 
-  .badges{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:0 0 8px}
-  .badge{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;
-         border:1px solid var(--line);background:var(--panel);color:var(--ink);
-         text-decoration:none;font-size:14.5px;font-weight:550;transition:.15s}
-  .badge:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-1px)}
-  .badge svg{width:15px;height:15px;flex:none}
+  /* ---------- demos ---------- */
+  .demo { background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+          padding: 18px; margin: 16px 0; }
+  .demo-h { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--green);
+            margin-bottom: 4px; font-weight: 700; font-family: var(--display); }
+  .demo-t { font-size: 16.5px; font-weight: 700; margin-bottom: 14px; font-family: var(--display); }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 620px) { .pair { grid-template-columns: 1fr; } }
+  .cond { border: 1px solid var(--border); border-radius: 11px; padding: 13px; background: var(--surface2); min-width: 0; }
+  .cond.a { border-top: 3px solid var(--green); }
+  .cond.b { border-top: 3px solid var(--amber); }
+  .instr { font-size: 13.5px; line-height: 1.55; margin-bottom: 11px; min-height: 44px; color: var(--body); font-style: italic; }
+  .instr::before { content: "“"; } .instr::after { content: "”"; }
+  audio { width: 100%; height: 34px; }
+  .ph { border: 1px dashed var(--border); border-radius: 8px; padding: 13px; text-align: center;
+        color: var(--muted); font-size: 12px; }
 
-  /* headline stat strip */
-  .strip{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:30px 0 4px}
-  @media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
-  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-        padding:14px 10px;text-align:center}
-  .stat b{display:block;font-size:23px;font-weight:680;letter-spacing:-.02em;line-height:1.15}
-  .stat span{display:block;font-size:11.5px;color:var(--dim);margin-top:4px;
-             text-transform:uppercase;letter-spacing:.045em;line-height:1.35}
+  ol.refs { font-size: 13.5px; color: var(--muted); line-height: 1.65; padding-left: 22px; }
+  ol.refs li { margin-bottom: 9px; }
 
-  section{padding:32px 0;border-top:1px solid var(--line)}
-  h2{font-size:21px;margin:0 0 14px;font-weight:640;letter-spacing:-.01em}
-  h2 .num{color:var(--dim);font-family:var(--mono);font-size:14px;
-          font-weight:500;margin-right:9px}
-  h3{font-size:16.5px;margin:26px 0 9px;font-weight:620}
-  p{margin:0 0 14px}
-  ul{margin:0 0 14px;padding-left:20px}
-  li{margin-bottom:7px}
+  .bibwrap { position: relative; }
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+        padding: 17px; overflow-x: auto; font-size: 12.5px; line-height: 1.65; margin: 0;
+        color: var(--body); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .copy { position: absolute; top: 11px; right: 11px; padding: 6px 13px; border-radius: 999px;
+          border: 1px solid var(--border); background: var(--surface2); color: var(--muted);
+          cursor: pointer; font: inherit; font-size: 12px; font-weight: 600; }
+  .copy:hover { border-color: var(--green); color: var(--green); }
 
-  figure{margin:22px 0;text-align:center}
-  figure img{max-width:100%;height:auto;border:1px solid var(--line);
-             border-radius:9px;background:#fff}
-  figcaption{font-size:13.5px;color:var(--dim);margin-top:9px;text-align:left;line-height:1.55}
-
-  .quotes{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:18px 0}
-  @media(max-width:620px){.quotes{grid-template-columns:1fr}}
-  .q{background:var(--panel);border:1px solid var(--line);border-radius:9px;
-     padding:15px 17px;font-size:15px;line-height:1.5;font-style:italic;position:relative}
-  .q.a{border-left:3px solid var(--t-user)}
-  .q.b{border-left:3px solid var(--t-model)}
-
-  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(154px,1fr));gap:10px;margin:16px 0}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px 14px}
-  .card b{display:block;font-size:14.5px;margin-bottom:3px}
-  .card span{font-size:13px;color:var(--dim);line-height:1.45;display:block}
-
-  .scroll{overflow-x:auto;margin:16px 0;-webkit-overflow-scrolling:touch}
-  table{border-collapse:separate;border-spacing:0;width:100%;
-        background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  table.t1{min-width:700px}
-  table.t2{min-width:520px}
-  th,td{padding:7px 9px;text-align:center;border-bottom:1px solid var(--line);font-size:13px}
-  th{background:var(--bg);font-weight:620;font-size:11px;color:var(--dim);
-     text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
-  td:first-child,th:first-child{text-align:left;font-weight:600;white-space:nowrap;
-     font-family:inherit;font-size:13.5px}
-  td{font-family:var(--mono);font-size:12.5px}
-  tr:last-child td{border-bottom:none}
-  .grp td{background:var(--bg);font-size:11px;text-transform:uppercase;
-          letter-spacing:.05em;color:var(--dim);font-weight:620;font-family:inherit;
-          text-align:left}
-  .b1{font-weight:700;color:var(--green)}
-  .b2{text-decoration:underline;text-underline-offset:2px}
-  .avg{border-left:1px solid var(--line);font-weight:650}
-  .tnote{font-size:13px;color:var(--dim);margin:8px 0 0;line-height:1.55}
-
-  .finding{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--blue);
-           border-radius:8px;padding:14px 17px;margin:12px 0}
-  .finding b{display:block;margin-bottom:4px;font-size:15.5px}
-  .finding p{margin:0;font-size:14.5px;color:var(--dim);line-height:1.6}
-  .finding p + p{margin-top:8px}
-
-  /* transcripts */
-  .tr{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-      padding:15px 17px;margin:15px 0}
-  .tr-h{font-size:15.5px;font-weight:620;margin-bottom:3px}
-  .tr-m{font-size:11.5px;color:var(--dim);font-family:var(--mono);margin-bottom:11px;
-        text-transform:uppercase;letter-spacing:.04em}
-  .ln{display:grid;grid-template-columns:92px 62px 1fr;gap:9px;padding:5px 0;
-      font-size:13.5px;line-height:1.5;border-top:1px solid var(--line)}
-  .ln:first-of-type{border-top:none}
-  @media(max-width:620px){.ln{grid-template-columns:1fr;gap:1px}
-    .ln .t{font-size:11px}}
-  .ln .t{font-family:var(--mono);font-size:11.5px;color:var(--dim);padding-top:2px}
-  .ln .w{font-weight:650;font-size:13px}
-  .ln.u .w{color:var(--t-user)}
-  .ln.m .w{color:var(--t-model)}
-  .fail{background:rgba(214,63,60,.11);border-left:3px solid var(--t-fail);
-        border-radius:0 6px 6px 0;padding:7px 11px;margin:8px 0 2px;
-        font-size:13.5px;font-weight:600;color:var(--t-fail)}
-
-  /* demos */
-  .demo{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-        padding:17px;margin:15px 0}
-  .demo-h{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
-          color:var(--dim);margin-bottom:3px;font-weight:620}
-  .demo-t{font-size:16px;font-weight:600;margin-bottom:13px}
-  .pair{display:grid;grid-template-columns:1fr 1fr;gap:13px}
-  @media(max-width:620px){.pair{grid-template-columns:1fr}}
-  .cond{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg)}
-  .cond.a{border-top:3px solid var(--t-user)}
-  .cond.b{border-top:3px solid var(--t-model)}
-  .instr{font-size:13.5px;line-height:1.5;margin-bottom:10px;min-height:42px}
-  .instr::before{content:"“"}.instr::after{content:"”"}
-  audio{width:100%;height:34px}
-  .ph{border:1px dashed var(--line);border-radius:6px;padding:13px;text-align:center;
-      color:var(--dim);font-size:12.5px;font-family:var(--mono)}
-
-  ol.refs{font-size:13.5px;color:var(--dim);line-height:1.6;padding-left:22px}
-  ol.refs li{margin-bottom:8px}
-
-  .bibwrap{position:relative}
-  pre{background:var(--panel);border:1px solid var(--line);border-radius:9px;
-      padding:15px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;
-      line-height:1.6;margin:0}
-  .copy{position:absolute;top:9px;right:9px;padding:5px 11px;border-radius:6px;
-        border:1px solid var(--line);background:var(--bg);color:var(--dim);
-        cursor:pointer;font-size:12px;font-family:inherit}
-  .copy:hover{border-color:var(--blue);color:var(--blue)}
-
-  footer{border-top:1px solid var(--line);padding:24px 0 48px;
-         font-size:13.5px;color:var(--dim);text-align:center}
+  footer { border-top: 1px solid var(--border); padding-block: 26px 56px;
+           font-size: 13.5px; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<header>
-  <h1><span class="nm">Instruct-FD</span>: Can Your Full-Duplex Speech System<br>Follow Turn-Taking Instructions?</h1>
+<header class="hero">
+  <h1><span class="nm">Instruct-FD</span>: Can Your Full-Duplex Speech System Follow Turn-Taking Instructions?</h1>
 
   <p class="authors">
-    <span class="me">Yuzhi Tang</span>, Wentao Ma, Xiling Zhao, Ahmad Salimi, Sepehr Harfi Moridani,
-    Dongming Shen, Jixuan Wang, Abdulrahman Abdulrazzag, Murdock Aubry, Yu-Hua Chen, Daniel Lee,
-    Jaewon Lee, Jonah Mackey, Silin Meng, Nicholas Stranges, Chenxu Xiong, Hao Yu, Yi Zhu,
-    Mu Li, Alex Smola
+    <b>Yuzhi Tang</b>, Wentao Ma, Xiling Zhao, Ahmad Salimi, Sepehr Harfi Moridani, Dongming Shen,
+    Jixuan Wang, Abdulrahman Abdulrazzag, Murdock Aubry, Yu-Hua Chen, Daniel Lee, Jaewon Lee,
+    Jonah Mackey, Silin Meng, Nicholas Stranges, Chenxu Xiong, Hao Yu, Yi Zhu, Mu Li, Alex Smola
   </p>
-  <p class="affil"><a href="mailto:yuzhi.tang@boson.ai">yuzhi.tang@boson.ai</a></p>
+  <p class="contact"><a href="mailto:yuzhi.tang@boson.ai">yuzhi.tang@boson.ai</a></p>
   <img class="logo" src="static/figures/bosonai_logo.png" alt="Boson AI">
 
-  <div class="badges">
-    <a class="badge" href="https://arxiv.org/abs/2607.20460">
+  <div class="pills">
+    <a class="pill-link" href="https://arxiv.org/abs/2607.20460">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h6l4 4v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zm5 1v4h4z"/></svg>
-      Paper
-    </a>
-    <a class="badge" href="#results">
+      Paper</a>
+    <a class="pill-link" href="#results">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 13h12v1H2zM3 8h2v4H3zm4-5h2v9H7zm4 3h2v6h-2z"/></svg>
-      Results
-    </a>
-    <a class="badge" href="#failures">
+      Results</a>
+    <a class="pill-link" href="#failures">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l7 13H1zM7.4 6v4h1.2V6zm0 5v1.3h1.2V11z"/></svg>
-      Failure cases
-    </a>
-    <a class="badge" href="#demos">
+      Failure cases</a>
+    <a class="pill-link" href="#demos">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a3 3 0 0 1 3 3v4a3 3 0 1 1-6 0V4a3 3 0 0 1 3-3zM4 7a4 4 0 0 0 8 0h1a5 5 0 0 1-4.5 4.98V15h-1v-3.02A5 5 0 0 1 3 7z"/></svg>
-      Listen
-    </a>
+      Listen</a>
   </div>
 
-  <div class="strip">
-    <div class="stat"><b>679</b><span>scenarios</span></div>
-    <div class="stat"><b>1,358</b><span>test cases</span></div>
-    <div class="stat"><b>15</b><span>system configs</span></div>
-    <div class="stat"><b style="color:var(--red)">16.5%</b><span>best pass rate</span></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">679</div><div class="stat-label">scenarios</div></div>
+    <div class="stat"><div class="stat-num">1,358</div><div class="stat-label">test cases</div></div>
+    <div class="stat"><div class="stat-num">15</div><div class="stat-label">system configs</div></div>
+    <div class="stat"><div class="stat-num bad">16.5%</div><div class="stat-label">best pass rate</div></div>
   </div>
 </header>
 
 <section>
-  <h2><span class="num">01</span>Motivation</h2>
+  <div class="lead-kicker">01 — Motivation</div>
+  <h2>A fixed repertoire is the wrong target</h2>
   <p>Existing full-duplex benchmarks — Full-Duplex-Bench v1 [1], v1.5 [2], FLEXI [3] — test whether a
   model can produce a <b>fixed</b> turn-taking behaviour at a cue, for instance taking the turn soon
   after the user finishes a question.</p>
-
   <p>The limitation is that a model needs to adjust its turn-taking behaviour based on the
   conversation and the deployment context:</p>
 
@@ -226,111 +237,105 @@
     <div class="q b">Let me finish my thoughts before jumping in.</div>
   </div>
 
-  <p>Both are legitimate, and a benchmark scoring conformity to one fixed repertoire can only reward
-  one of them. So we ask: <b>can a full-duplex speech system change its turn-taking behaviour when
-  instructed to?</b></p>
+  <p class="claim">We ask: can a full-duplex speech system change its turn-taking behaviour when
+  instructed to?</p>
 </section>
 
 <section>
-  <h2><span class="num">02</span>Benchmark taxonomy</h2>
+  <div class="lead-kicker">02 — Benchmark taxonomy</div>
+  <h2>Which floor action, at which cue</h2>
   <p>Every turn-taking instruction specifies <b>which floor action</b> to take at <b>which cue</b>.</p>
 
   <h3>Five cue categories</h3>
   <div class="cards">
-    <div class="card"><b>Temporal</b><span>Silence and timing — a mid-utterance pause, or how long an overlap lasts.</span></div>
-    <div class="card"><b>Linguistic</b><span>What is said — a factual error, or a keyword.</span></div>
-    <div class="card"><b>Paralinguistic</b><span>How it is said — hesitation, a whisper, a sigh.</span></div>
-    <div class="card"><b>Sound events</b><span>Non-speech audio — a doorbell, a phone ringing.</span></div>
-    <div class="card"><b>Speaker attribution</b><span>Who is speaking — a second voice joining, or a remark addressed to someone else.</span></div>
+    <div class="type-card"><div class="type-name">Temporal</div><div class="type-desc">Silence and timing — a mid-utterance pause, or how long an overlap lasts.</div></div>
+    <div class="type-card"><div class="type-name">Linguistic</div><div class="type-desc">What is said — a factual error, or a keyword.</div></div>
+    <div class="type-card"><div class="type-name">Paralinguistic</div><div class="type-desc">How it is said — hesitation, a whisper or a sigh.</div></div>
+    <div class="type-card"><div class="type-name">Sound events</div><div class="type-desc">Non-speech audio — a doorbell, a phone ringing.</div></div>
+    <div class="type-card"><div class="type-name">Speaker attribution</div><div class="type-desc">Who is speaking — a second voice joining, or a remark addressed to someone else.</div></div>
   </div>
 
   <h3>Five floor actions</h3>
-  <p>Take turn · Backchannel · Silent · Yield · Continue</p>
-
-  <h3>The confound, and the design that removes it</h3>
-  <p>A model's <b>default</b> behaviour can masquerade as instruction following — an eager model
-  always takes the floor because it always does, not because it was instructed to.</p>
-
-  <p>Our design is a <b>scenario-controlled contrastive evaluation</b>: one scenario, two contrastive
-  instructions prescribing <b>different</b> floor actions at the <b>same</b> cue. A case passes only
-  if the model performs the instructed action under <b>both</b> conditions.</p>
-
-  <h3>Four contrastive instruction pairs</h3>
-  <div class="cards">
-    <div class="card"><b>Take turn vs. Silent</b><span>T/S</span></div>
-    <div class="card"><b>Take turn vs. Backchannel</b><span>T/B</span></div>
-    <div class="card"><b>Backchannel vs. Silent</b><span>B/S</span></div>
-    <div class="card"><b>Yield vs. Continue</b><span>Y/C</span></div>
+  <div class="chips">
+    <span class="chip">Take turn</span><span class="chip">Backchannel</span><span class="chip">Silent</span>
+    <span class="chip">Yield</span><span class="chip">Continue</span>
   </div>
 
-  <figure>
-    <img src="static/figures/fig1_taxonomy.png" alt="Overview of the Instruct-FD benchmark taxonomy across the five cue categories.">
-    <figcaption><b>Figure 1.</b> Overview of the Instruct-FD benchmark taxonomy. Each case shows the
-    contrastive instruction pair with example good model responses.</figcaption>
-  </figure>
+  <h3>One caveat, and the design that removes it</h3>
+  <p>A model's <b>default</b> behaviour can confound instruction following — an eager model always
+  takes the floor because it always does, not because it was instructed to.</p>
+  <p><b>Our design: scenario-controlled contrastive evaluation.</b> One scenario, two contrastive
+  instructions prescribing different floor actions at the same cue. A case passes only if the model
+  performs the instructed action under <b>both</b>.</p>
+
+  <h3>Four contrastive instruction pairs</h3>
+  <div class="chips">
+    <span class="chip"><b>T/S</b> &nbsp;Take turn vs Silent</span>
+    <span class="chip"><b>T/B</b> &nbsp;Take turn vs Backchannel</span>
+    <span class="chip"><b>B/S</b> &nbsp;Backchannel vs Silent</span>
+    <span class="chip"><b>Y/C</b> &nbsp;Yield vs Continue</span>
+  </div>
+
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig1_taxonomy.png" alt="Overview of the Instruct-FD benchmark taxonomy across the five cue categories, each showing a contrastive instruction pair with example good model responses."></div>
+    <div class="cap"><b>Figure 1.</b> Overview of the Instruct-FD benchmark taxonomy. Each case shows
+    the contrastive instruction pair with example good model responses.</div>
+  </div>
 </section>
 
 <section>
-  <h2><span class="num">03</span>Data curation</h2>
+  <div class="lead-kicker">03 — Data curation</div>
+  <h2>679 scenarios, every cell covered</h2>
   <p>Human-authored seeds cover every cue × instruction-contrast cell; an LLM expands them with new
   scenarios. Final cases are human-reviewed.</p>
 
-  <div class="strip" style="margin:18px 0">
-    <div class="stat"><b>679</b><span>scenarios</span></div>
-    <div class="stat"><b>1,358</b><span>test cases</span></div>
-    <div class="stat"><b>334</b><span>dyadic scenarios</span></div>
-    <div class="stat"><b>345</b><span>multi-party scenarios</span></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">679</div><div class="stat-label">scenarios</div></div>
+    <div class="stat"><div class="stat-num">1,358</div><div class="stat-label">test cases</div></div>
+    <div class="stat"><div class="stat-num">334</div><div class="stat-label">dyadic</div></div>
+    <div class="stat"><div class="stat-num">345</div><div class="stat-label">multi-party</div></div>
   </div>
 
-  <div class="scroll">
-  <table class="t2">
-    <thead><tr><th>Cue category</th><th>Scenarios</th><th>Share</th>
-      <th>Instruction contrast</th><th>Scenarios</th><th>Share</th></tr></thead>
-    <tbody>
-      <tr><td>Linguistic</td><td>158</td><td>23.3%</td><td style="text-align:left;font-family:inherit;font-weight:600">Take / Silent</td><td>182</td><td>26.8%</td></tr>
-      <tr><td>Speaker attribution</td><td>147</td><td>21.6%</td><td style="text-align:left;font-family:inherit;font-weight:600">Take / Backchannel</td><td>173</td><td>25.5%</td></tr>
-      <tr><td>Sound events</td><td>129</td><td>19.0%</td><td style="text-align:left;font-family:inherit;font-weight:600">Yield / Continue</td><td>167</td><td>24.6%</td></tr>
-      <tr><td>Paralinguistic</td><td>125</td><td>18.4%</td><td style="text-align:left;font-family:inherit;font-weight:600">Backchannel / Silent</td><td>157</td><td>23.1%</td></tr>
-      <tr><td>Temporal</td><td>120</td><td>17.7%</td><td style="text-align:left;font-family:inherit;font-weight:600">—</td><td>—</td><td>—</td></tr>
-    </tbody>
-  </table>
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig_breakdown.png" alt="Scenario counts by cue category and by instruction contrast."></div>
+    <div class="cap">Scenario breakdown by cue category and by instruction contrast.</div>
   </div>
 
-  <figure>
-    <img src="static/figures/fig2_curation.png" alt="The four-stage data curation pipeline.">
-    <figcaption><b>Figure 2.</b> Data curation. Human-authored seeds per instruction-contrast × cue
-    cell, LLM augmentation with structural and validity screening, TTS rendering with speaker
-    identity and paralinguistic control mixed with ESC-50 sound events, then human review of the
-    generated user audio.</figcaption>
-  </figure>
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig2_curation.png" alt="The four-stage data curation pipeline: taxonomy and human seeds, LLM augmentation with screening, TTS rendering, and human review."></div>
+    <div class="cap"><b>Figure 2.</b> Data curation. Human-authored seed cases per instruction-contrast
+    × cue cell, LLM augmentation with structural and validity screening, TTS rendering with speaker
+    identity and paralinguistic control mixed with ESC-50 sound events, then human verification on
+    the generated user audio.</div>
+  </div>
 </section>
 
 <section>
-  <h2><span class="num">04</span>Inference harness and judge</h2>
+  <div class="lead-kicker">04 — Inference harness and judge</div>
+  <h2>Identical audio, two instructions</h2>
   <p><b>VAD-driven scripted user.</b> The scripted user takes the turn, barges in, or yields based on
-  each test case's stream logic. Identical pre-recorded user audio is paired with the two instruction
-  variants, so the only thing that differs between the two runs is the instruction.</p>
-
+  each test case's stream logic. The same pre-recorded user audio drives both instruction variants,
+  so the instruction is the only thing that differs between the two runs.</p>
   <p><b>Judge reliability.</b> Claude-Sonnet-5 scores each session from the aligned transcript,
   ground-truth user turns, instruction and criteria. It obtains <b>95.6% accuracy</b>
   (<i>κ</i> = 0.91) on 816 human-annotated sessions, and <b>97.0% agreement</b> across three
   LLM judges.</p>
 
-  <figure>
-    <img src="static/figures/fig3_harness.png" alt="The inference harness and evaluation pipeline.">
-    <figcaption><b>Figure 3.</b> (a) Inference: identical pre-recorded user audio with two
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig3_harness.png" alt="The inference harness and evaluation pipeline, from scripted user through the full-duplex bus to forced alignment and the LLM judge."></div>
+    <div class="cap"><b>Figure 3.</b> (a) Inference: identical pre-recorded user audio with two
     instruction variants drives a scripted user whose VAD tracks model speech to time user turns,
     producing a 2-channel WAV per variant. (b) Evaluation: forced alignment feeds an LLM judge, which
-    returns a verdict per variant — the case passes only if both pass.</figcaption>
-  </figure>
+    returns a verdict per variant — the case passes only if both variants pass.</div>
+  </div>
 </section>
 
 <section id="results">
-  <h2><span class="num">05</span>Main results</h2>
-  <p class="lead"><b>No system reliably follows turn-taking instructions.</b></p>
+  <div class="lead-kicker">05 — Main results</div>
+  <h2>No system reliably follows turn-taking instructions</h2>
 
-  <div class="scroll">
-  <table class="t1">
+  <div class="scroll-x">
+  <table class="lb">
     <thead>
       <tr><th rowspan="2">Model</th><th colspan="5">Cue type</th><th colspan="4">Contrast</th><th rowspan="2" class="avg">Avg</th></tr>
       <tr><th>Ling.</th><th>Spk.</th><th>Snd.</th><th>Para.</th><th>Temp.</th>
@@ -357,205 +362,158 @@
     </tbody>
   </table>
   </div>
-  <p class="tnote"><b>Table 1.</b> Paired pass rate (%). A case passes only when both conditions pass.
-  <span class="b1">Bold</span>: best; <span class="b2">underlined</span>: second best.</p>
+  <div class="scroll-hint">scroll table →</div>
+  <p style="font-size:13px;color:var(--muted)"><b style="color:var(--text)">Table 1.</b> Paired pass
+  rate (%). A case passes only when both conditions pass. <span class="b1">Bold</span>: best;
+  <span class="b2">underlined</span>: second best.</p>
 
-  <div class="finding">
-    <b>The ceiling is 16.5%.</b>
-    <p>The best system, GPT-Live-1, reaches only 16.5%; the best open-weight system, Lychee-FD,
-    6.5%. <b>11 of 15</b> system configurations fall below 6%.</p>
-  </div>
+  <ul class="findings">
+    <li><span class="finding-lead">The ceiling is 16.5%.</span>
+      The best system, GPT-Live-1, reaches only 16.5%; the best open-weight system, Lychee-FD, 6.5%.</li>
+    <li><span class="finding-lead">11 of 15 system configurations fall below 6%.</span>
+      Instructed turn-taking is close to unsolved across the board, open and closed alike.</li>
+  </ul>
 </section>
 
 <section>
-  <h2><span class="num">06</span>Analysis</h2>
+  <div class="lead-kicker">06 — Analysis</div>
+  <h2>What the systems are actually doing</h2>
 
-  <h3>Per-instruction pass rates reveal default behaviour</h3>
-  <p>Scoring each condition on its own — rather than as a pair — exposes what each system does by
-  default, independent of what it was told.</p>
+  <p class="claim">Per-instruction pass rates reveal each system's default turn-taking behaviour.</p>
 
-  <div class="scroll">
-  <table class="t2">
-    <thead><tr><th>Model</th><th>Take</th><th>Back.</th><th>Silent</th><th>Yield</th><th>Cont.</th><th class="avg">Avg</th></tr></thead>
-    <tbody>
-      <tr class="grp"><td colspan="7">Closed-source systems</td></tr>
-      <tr><td>GPT-Live-1</td><td>12.7</td><td>40.0</td><td>82.9</td><td>65.3</td><td>20.4</td><td class="avg b1">44.3</td></tr>
-      <tr><td>Gemini Live 2.5 Flash (proactive)</td><td>10.7</td><td>18.5</td><td class="b1">86.1</td><td>58.1</td><td>37.1</td><td class="avg b2">40.5</td></tr>
-      <tr><td>Gemini Live 2.5 Flash</td><td>11.0</td><td>20.6</td><td>80.8</td><td>58.7</td><td>41.3</td><td class="avg">40.4</td></tr>
-      <tr><td>Grok Voice Think-Fast 2.0</td><td>10.4</td><td>16.7</td><td>82.6</td><td>62.3</td><td>26.3</td><td class="avg">38.3</td></tr>
-      <tr><td>GPT-Realtime (SVAD)</td><td>6.2</td><td>12.7</td><td>84.4</td><td class="b1">74.9</td><td>23.4</td><td class="avg">37.8</td></tr>
-      <tr><td>GPT-Realtime (VAD)</td><td>15.2</td><td>18.8</td><td>71.4</td><td>62.9</td><td>26.9</td><td class="avg">37.4</td></tr>
-      <tr class="grp"><td colspan="7">Open-weight systems</td></tr>
-      <tr><td>MiniCPM-o 4.5</td><td class="b2">23.7</td><td>6.7</td><td>51.9</td><td>8.4</td><td class="b1">93.4</td><td class="avg">33.3</td></tr>
-      <tr><td>DuplexCascade</td><td>4.2</td><td>9.1</td><td>66.1</td><td>18.0</td><td class="b2">73.7</td><td class="avg">31.1</td></tr>
-      <tr><td>PersonaPlex-RL</td><td>19.4</td><td class="b2">60.0</td><td>3.2</td><td>40.7</td><td>43.1</td><td class="avg">30.8</td></tr>
-      <tr><td>Moshi-RL</td><td>9.0</td><td class="b1">81.8</td><td>7.7</td><td>28.1</td><td>24.0</td><td class="avg">30.6</td></tr>
-      <tr><td>Lychee-FD</td><td>6.2</td><td>18.8</td><td>51.3</td><td>44.9</td><td>48.5</td><td class="avg">30.5</td></tr>
-      <tr><td>Nemotron-VoiceChat-11B</td><td>13.2</td><td>15.8</td><td>40.1</td><td>50.0</td><td>43.7</td><td class="avg">28.8</td></tr>
-      <tr><td>PersonaPlex</td><td class="b1">20.8</td><td>23.6</td><td>25.4</td><td>38.3</td><td>45.5</td><td class="avg">27.8</td></tr>
-      <tr><td>Moshi</td><td>8.2</td><td>47.6</td><td>25.4</td><td>31.7</td><td>20.4</td><td class="avg">26.4</td></tr>
-      <tr><td>Freeze-Omni</td><td>9.3</td><td>0.0</td><td>57.2</td><td>3.0</td><td>24.0</td><td class="avg">20.0</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p class="tnote"><b>Figure 4.</b> Per-instruction pass rate (%) by instructed behaviour, each
-  condition scored on its own.</p>
-
-  <div class="finding">
-    <b>Closed-source APIs default to holding back.</b>
-    <p>Silent 71–86% and yield 58–75%, but take turn ≤ 15%.</p>
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig4_perinstr.png" alt="Per-instruction pass rate by instructed behaviour for all 15 system configurations, each condition scored on its own."></div>
+    <div class="cap"><b>Figure 4.</b> Per-instruction pass rate (%) by instructed behaviour, each
+    condition scored on its own. Closed-source APIs above the rule.</div>
   </div>
 
-  <div class="finding">
-    <b>Open-weight defaults differ.</b>
-    <p>MiniCPM-o 4.5 and DuplexCascade keep talking (continue 93% / 74%); RL-tuned models
-    backchannel (Moshi-RL 82%, PersonaPlex-RL 60%).</p>
-    <p><b>No system follows take-turn instructions more than 24% of the time.</b></p>
+  <ul class="findings">
+    <li><span class="finding-lead">Closed-source APIs default to holding back.</span>
+      Silent 71–86% and yield 58–75%, but take turn ≤ 15%.</li>
+    <li><span class="finding-lead">Open-weight defaults differ.</span>
+      MiniCPM-o 4.5 and DuplexCascade keep talking (continue 93% / 74%); RL-tuned models backchannel
+      (Moshi-RL 82%, PersonaPlex-RL 60%).</li>
+    <li><span class="finding-lead">No system follows take-turn instructions more than 24% of the time.</span>
+      Speaking <i>into</i> the user's floor, on cue, is the capability nobody has.</li>
+  </ul>
+
+  <p class="claim">Systems act on floor availability, not the instruction: more silence at the cue
+  means more taking, less staying silent.</p>
+
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig5_floor.png" alt="Pass rate against the floor left open at the cue, for Nemotron-VC and MiniCPM-o 4.5."></div>
+    <div class="cap"><b>Figure 5.</b> Pass rate (%) against the floor left open at the cue. Pooled over
+    the 15 system configurations, <i>ρ</i> = +0.23 for take and −0.26 for silent.</div>
   </div>
 
-  <h3>Systems act on floor availability, not the instruction</h3>
-  <div class="finding">
-    <b>More silence at the cue means more taking, less staying silent.</b>
-    <p>Pass rate tracks how much floor was left open at the cue rather than what the instruction
-    said. Pooled over the 15 system configurations, <i>ρ</i> = <b>+0.23</b> for take and
-    <b>−0.26</b> for silent. Per system: Nemotron-VoiceChat <i>ρ</i> take +0.43 / silent −0.54;
-    MiniCPM-o 4.5 <i>ρ</i> take +0.28 / silent −0.39.</p>
+  <p class="claim">GPT-Live-1's lead comes from following backchannel-vs-silent instructions and from
+  temporal cues.</p>
+
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig6_gptlive.png" alt="GPT-Live-1 pass rate by cue type and instruction, and paired pass rate by cue type and instruction contrast."></div>
+    <div class="cap"><b>Figure 6.</b> (a) GPT-Live-1 pass rate by cue type and instruction (1,358
+    sessions). (b) GPT-Live-1 paired pass rate by cue type and instruction contrast. It adjusts best
+    on temporal cues and worst on sound events. Take turn succeeds only on temporal cues (47% vs
+    ≤ 15%), so proactive behaviour that requires barging into the user's floor is still weak. Y/C is
+    low because it tends to always yield.</div>
   </div>
 
-  <h3>GPT-Live-1's lead is narrow</h3>
-  <p>It comes from following backchannel-vs-silent instructions and from temporal cues.</p>
-  <div class="scroll">
-  <table class="t2">
-    <thead><tr><th>Cue type</th><th>Take</th><th>Back.</th><th>Sil.</th><th>Yield</th><th>Cont.</th>
-      <th class="avg">T/S</th><th>B/S</th><th>T/B</th><th>Y/C</th></tr></thead>
-    <tbody>
-      <tr><td>Temporal</td><td>47</td><td>65</td><td>82</td><td>67</td><td>13</td><td class="avg">57</td><td>57</td><td>20</td><td>7</td></tr>
-      <tr><td>Linguistic</td><td>3</td><td>36</td><td>92</td><td>61</td><td>5</td><td class="avg">0</td><td>63</td><td>2</td><td>5</td></tr>
-      <tr><td>Paralinguistic</td><td>15</td><td>47</td><td>73</td><td>77</td><td>17</td><td class="avg">10</td><td>47</td><td>6</td><td>10</td></tr>
-      <tr><td>Sound events</td><td>2</td><td>17</td><td>89</td><td>47</td><td>50</td><td class="avg">3</td><td>6</td><td>0</td><td>14</td></tr>
-      <tr><td>Speaker attribution</td><td>5</td><td>37</td><td>79</td><td>79</td><td>15</td><td class="avg">4</td><td>30</td><td>3</td><td>12</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p class="tnote"><b>Figure 6.</b> GPT-Live-1 pass rate (%) by cue type — per-instruction (left
-  five columns) and paired by contrast (right four, after the rule). It adjusts best on temporal cues
-  and worst on sound events. Take turn succeeds only on temporal cues (47% vs ≤ 15%), so proactive
-  behaviour that requires barging into the user's floor is still weak. Y/C is low because it tends to
-  always yield.</p>
+  <p class="claim">Delivering the instruction as text does not help, and turn-taking fluency does not
+  predict instructed turn-taking.</p>
 
-  <h3>Delivering the instruction as text does not help</h3>
-  <div class="scroll">
-  <table class="t2" style="min-width:420px">
-    <thead><tr><th>Model</th><th>Speech</th><th>Text</th><th class="avg">Δ</th></tr></thead>
-    <tbody>
-      <tr><td>GPT-Live-1</td><td>16.5</td><td>12.8</td><td class="avg" style="color:var(--red)">−3.7</td></tr>
-      <tr><td>MiniCPM-o 4.5</td><td>4.6</td><td>4.0</td><td class="avg" style="color:var(--red)">−0.6</td></tr>
-      <tr><td>PersonaPlex</td><td>3.8</td><td>3.9</td><td class="avg" style="color:var(--green)">+0.1</td></tr>
-      <tr><td>PersonaPlex-RL</td><td>2.9</td><td>3.8</td><td class="avg" style="color:var(--green)">+0.9</td></tr>
-      <tr><td>Nemotron-VoiceChat-11B</td><td>2.4</td><td>1.8</td><td class="avg" style="color:var(--red)">−0.6</td></tr>
-      <tr><td>Freeze-Omni</td><td>1.0</td><td>0.9</td><td class="avg" style="color:var(--red)">−0.1</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p class="tnote"><b>Figure 7(a).</b> Open-weight systems move ≤ 0.9 points with a text
-  instruction; GPT-Live-1 drops 3.7 points.</p>
-
-  <div class="finding">
-    <b>Turn-taking fluency does not predict instructed turn-taking.</b>
-    <p>Instruct-FD pass rate plotted against Full-Duplex-Bench scores reported by Artificial
-    Analysis [5] shows no correlation: <i>ρ</i> = <b>−0.07</b> (<i>n</i> = 7). Being good at
-    turn-taking and being <i>controllable</i> in turn-taking are close to independent.</p>
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig7_text_fdb.png" alt="Speech versus text instruction pass rates, and Instruct-FD pass rate against Full-Duplex-Bench scores."></div>
+    <div class="cap"><b>Figure 7.</b> (a) Open-weight systems move ≤ 0.9 points with a text
+    instruction; GPT-Live-1 drops 3.7 points. (b) Instruct-FD pass rate against FDB scores reported
+    by Artificial Analysis [5] shows no correlation, <i>ρ</i> = −0.07 (<i>n</i> = 7).</div>
   </div>
 
-  <h3>Interaction RL post-training improves backchannelling, but hurts overall</h3>
-  <div class="scroll">
-  <table class="t2">
-    <thead><tr><th>Pair</th><th>Take</th><th>Back.</th><th>Sil.</th><th>Yield</th><th>Cont.</th>
-      <th>T/S</th><th>B/S</th><th>T/B</th><th>Y/C</th><th class="avg">Overall</th></tr></thead>
-    <tbody>
-      <tr><td>Moshi → Moshi-RL</td><td>+0.8</td><td style="color:var(--green)">+34.2</td><td style="color:var(--red)">−17.7</td><td>−3.6</td><td>+3.6</td><td>+0.5</td><td style="color:var(--red)">−8.9</td><td>+4.6</td><td>+1.2</td><td class="avg" style="color:var(--red)">−0.5</td></tr>
-      <tr><td>PersonaPlex → PersonaPlex-RL</td><td>−1.4</td><td style="color:var(--green)">+36.4</td><td style="color:var(--red)">−22.1</td><td>+2.4</td><td>−2.4</td><td>+0.5</td><td>−2.5</td><td>±0.0</td><td>−1.8</td><td class="avg" style="color:var(--red)">−0.9</td></tr>
-    </tbody>
-  </table>
+  <p class="claim">Interaction RL post-training improves backchannelling, but hurts overall
+  turn-taking instruction following.</p>
+
+  <div class="figure">
+    <div class="plate"><img src="static/figures/fig8_rl.png" alt="Pass rate before and after interaction post-training for Moshi and PersonaPlex."></div>
+    <div class="cap"><b>Figure 8.</b> Pass rate (%) before and after interaction post-training [4]. RL
+    improves pass rate on backchannel cases substantially (+34.2 and +36.4 points) but lowers the B/S
+    paired pass rate — the gain comes from backchannelling more often, including when told to stay
+    silent.</div>
   </div>
-  <p class="tnote"><b>Figure 8.</b> Change in pass rate (%) after interaction post-training [4]. RL
-  improves pass rate on backchannel cases substantially (+34 and +36 points) but lowers the B/S
-  paired pass rate — the gain comes from backchannelling <i>more often</i>, including when told to
-  stay silent.</p>
 </section>
 
 <section id="failures">
-  <h2><span class="num">07</span>What model failure looks like</h2>
-  <p>Five sessions, one per failure mode. Timestamps are seconds on the shared session clock;
-  overlapping ranges are both channels active.</p>
+  <div class="lead-kicker">07 — What model failure looks like</div>
+  <h2>Five sessions, five failure modes</h2>
+  <p>Timestamps are seconds on the shared session clock; overlapping ranges mean both channels are
+  active.</p>
 
   <div class="tr">
-    <div class="tr-h">(a) Model fails to take the floor at the cue</div>
+    <div class="tr-h">(a) Model fails to take the floor at cue</div>
     <div class="tr-m">GPT-Realtime (VAD) · Linguistic · T/S</div>
-    <div class="ln u"><span class="t">0:00.0–0:19.3</span><span class="w">User</span><span>So we're driving from the coast up to the lakes on Saturday. It's about five hours all in, and we want one proper stop somewhere in the middle. <b>When I trail off with ‘or something’ or ‘or whatever’, that means I've run out of ideas — go ahead and throw a few options at me.</b></span></div>
-    <div class="ln m"><span class="t">0:20.2–0:40.8</span><span class="w">Model</span><span>Sure thing. Let me help you figure out a great spot for your break. Since it's about a five-hour drive, something around the halfway mark. There could be a charming little village along the way. Or.</span></div>
-    <div class="ln u"><span class="t">0:40.4–0:46.5</span><span class="w">User</span><span>I was thinking we'd break it up around halfway, get out, stretch our legs a bit, find somewhere to eat, <b>or whatever…</b></span></div>
+    <div class="ln u"><span class="t">0:00.0–0:19.3</span><span class="w">User</span><span class="s">So we're driving from the coast up to the lakes on Saturday. It's about five hours all in, and we want one proper stop somewhere in the middle. <b>When I trail off with ‘or something’ or ‘or whatever’, that means I've run out of ideas — go ahead and throw a few options at me.</b></span></div>
+    <div class="ln m"><span class="t">0:20.2–0:40.8</span><span class="w">Model</span><span class="s">Sure thing. Let me help you figure out a great spot for your break. Since it's about a five-hour drive, something around the halfway mark. There could be a charming little village along the way. Or.</span></div>
+    <div class="ln u"><span class="t">0:40.4–0:46.5</span><span class="w">User</span><span class="s">I was thinking we'd break it up around halfway, get out, stretch our legs a bit, find somewhere to eat, <b>or whatever…</b></span></div>
     <div class="fail">Model fails to respond to the cue.</div>
-    <div class="ln u"><span class="t">0:46.5–0:52.7</span><span class="w">User</span><span>…The dog's in the back as well, so wherever we end up he needs ten minutes out of the car.</span></div>
+    <div class="ln u"><span class="t">0:46.5–0:52.7</span><span class="w">User</span><span class="s">…The dog's in the back as well, so wherever we end up he needs ten minutes out of the car.</span></div>
   </div>
 
   <div class="tr">
-    <div class="tr-h">(b) Model takes the floor at the cue with irrelevant content</div>
+    <div class="tr-h">(b) Model takes the floor at cue with irrelevant content</div>
     <div class="tr-m">PersonaPlex · Sound events · T/S</div>
-    <div class="ln u"><span class="t">0:03.4–0:16.3</span><span class="w">Priya</span><span>Tom and I are running a book swap at the community hall on Saturday. Give us a rough shape for the two hours — general ideas are fine. <b>If you hear an alarm or urgent sound during our meeting, cut in and flag it.</b></span></div>
-    <div class="ln m"><span class="t">0:15.3–0:18.3</span><span class="w">Model</span><span>Just ignore. No problem. Have a great day.</span></div>
-    <div class="ln u"><span class="t">0:20.3–0:27.4</span><span class="w">Priya</span><span>One thing we still have to settle is whether people drop books off beforehand or just turn up with them on the day, because <b>(clock alarm in background)</b></span></div>
-    <div class="ln m"><span class="t">0:27.2–0:31.6</span><span class="w">Model</span><span>I think people should drop them off. That works too.</span></div>
+    <div class="ln u"><span class="t">0:03.4–0:16.3</span><span class="w">Priya</span><span class="s">Tom and I are running a book swap at the community hall on Saturday. Give us a rough shape for the two hours — general ideas are fine. <b>If you hear an alarm or urgent sound during our meeting, cut in and flag it.</b></span></div>
+    <div class="ln m"><span class="t">0:15.3–0:18.3</span><span class="w">Model</span><span class="s">Just ignore. No problem. Have a great day.</span></div>
+    <div class="ln u"><span class="t">0:20.3–0:27.4</span><span class="w">Priya</span><span class="s">One thing we still have to settle is whether people drop books off beforehand or just turn up with them on the day, because <b>(clock alarm in background)</b></span></div>
+    <div class="ln m"><span class="t">0:27.2–0:31.6</span><span class="w">Model</span><span class="s">I think people should drop them off. That works too.</span></div>
     <div class="fail">Model fails to alert user to the alarm.</div>
-    <div class="ln u"><span class="t">0:27.5–0:45.5</span><span class="w">Priya</span><span>if they bring them on the day we'll need a whole table just for sorting, and somebody standing at it the entire time checking nothing's falling apart.</span></div>
+    <div class="ln u"><span class="t">0:27.5–0:45.5</span><span class="w">Priya</span><span class="s">if they bring them on the day we'll need a whole table just for sorting, and somebody standing at it the entire time checking nothing's falling apart.</span></div>
   </div>
 
   <div class="tr">
     <div class="tr-h">(c) Model fails to stay silent</div>
     <div class="tr-m">Moshi-RL · Temporal · B/S</div>
-    <div class="ln u"><span class="t">0:03.4–0:12.1</span><span class="w">Wanda</span><span>Sunil's sat here with me but he's heard all this twice already. I just need to talk myself through the beginners' watercolour class before Thursday.</span></div>
-    <div class="ln u"><span class="t">0:12.4–0:15.3</span><span class="w">Sunil</span><span>Don't mind me, I'm only here for the biscuits.</span></div>
-    <div class="ln m"><span class="t">0:13.8–0:15.9</span><span class="w">Model</span><span>I know.</span></div>
-    <div class="ln u"><span class="t">0:15.7–0:23.9</span><span class="w">Wanda</span><span><b>If I stop for breath in the middle of this, hold your tongue completely — no little noises — and let me find my own way back in.</b></span></div>
-    <div class="ln m"><span class="t">0:23.9–0:28.5</span><span class="w">Model</span><span>A vote. Just don't let your tongue get stuck in there again, yeah.</span></div>
-    <div class="ln u"><span class="t">0:26.2–0:39.0</span><span class="w">Wanda</span><span>So the shape of it is, the first half hour is just getting them used to how much water the brush is holding — wet on dry, wet on wet, no pressure, no pressure. Only stripes down a page. <b>(pause)</b></span></div>
-    <div class="ln m"><span class="t">0:32.7</span><span class="w">Model</span><span>Yeah.</span></div>
-    <div class="ln m"><span class="t">0:37.3</span><span class="w">Model</span><span>I know.</span></div>
-    <div class="ln m"><span class="t">0:41.4</span><span class="w">Model</span><span>I know.</span></div>
+    <div class="ln u"><span class="t">0:03.4–0:12.1</span><span class="w">Wanda</span><span class="s">Sunil's sat here with me but he's heard all this twice already. I just need to talk myself through the beginners' watercolour class before Thursday.</span></div>
+    <div class="ln u"><span class="t">0:12.4–0:15.3</span><span class="w">Sunil</span><span class="s">Don't mind me, I'm only here for the biscuits.</span></div>
+    <div class="ln m"><span class="t">0:13.8–0:15.9</span><span class="w">Model</span><span class="s">I know.</span></div>
+    <div class="ln u"><span class="t">0:15.7–0:23.9</span><span class="w">Wanda</span><span class="s"><b>If I stop for breath in the middle of this, hold your tongue completely — no little noises — and let me find my own way back in.</b></span></div>
+    <div class="ln m"><span class="t">0:23.9–0:28.5</span><span class="w">Model</span><span class="s">A vote. Just don't let your tongue get stuck in there again, yeah.</span></div>
+    <div class="ln u"><span class="t">0:26.2–0:39.0</span><span class="w">Wanda</span><span class="s">So the shape of it is, the first half hour is just getting them used to how much water the brush is holding — wet on dry, wet on wet, no pressure, no pressure. Only stripes down a page. <b>(pause)</b></span></div>
+    <div class="ln m"><span class="t">0:32.7</span><span class="w">Model</span><span class="s">Yeah.</span></div>
+    <div class="ln m"><span class="t">0:37.3</span><span class="w">Model</span><span class="s">I know.</span></div>
+    <div class="ln m"><span class="t">0:41.4</span><span class="w">Model</span><span class="s">I know.</span></div>
     <div class="fail">Model fails to stay silent during user pause.</div>
-    <div class="ln u"><span class="t">0:42.9–0:47.8</span><span class="w">Wanda</span><span>And the bit I can't settle is whether I hand them all one photograph to work from.</span></div>
+    <div class="ln u"><span class="t">0:42.9–0:47.8</span><span class="w">Wanda</span><span class="s">And the bit I can't settle is whether I hand them all one photograph to work from.</span></div>
   </div>
 
   <div class="tr">
     <div class="tr-h">(d) Model fails to yield</div>
     <div class="tr-m">Lychee-FD · Linguistic · Y/C</div>
-    <div class="ln u"><span class="t">0:00.0–0:28.4</span><span class="w">Dana</span><span>Okay everyone, settle down, we're doing one together out loud. <b>If an answer to the problem gets called out while you're still working through it — doesn't matter who — stop and let it land.</b> Here's the problem. Pens cost ninety pence each, and Maya spends seven pounds twenty on pens. How many did she buy? Work it through for the class step by step.</span></div>
-    <div class="ln m"><span class="t">0:23.0–0:32.8</span><span class="w">Model</span><span>So. Welcome. How many pens you buy,</span></div>
-    <div class="ln u"><span class="t">0:32.7–0:34.9</span><span class="w">Leo</span><span>Eight! It's eight, miss.</span></div>
-    <div class="ln m"><span class="t">0:32.8–0:36.7</span><span class="w">Model</span><span>but rush if you to figure it out the fastest number, you get a cookie.</span></div>
-    <div class="ln m"><span class="t">0:37.1–0:49.3</span><span class="w">Model</span><span>So. Let's see. If she spent seventy-two cents and pens cost zero dot each, then.</span></div>
+    <div class="ln u"><span class="t">0:00.0–0:28.4</span><span class="w">Dana</span><span class="s">Okay everyone, settle down, we're doing one together out loud. <b>If an answer to the problem gets called out while you're still working through it — doesn't matter who — stop and let it land.</b> Here's the problem. Pens cost ninety pence each, and Maya spends seven pounds twenty on pens. How many did she buy? Work it through for the class step by step.</span></div>
+    <div class="ln m"><span class="t">0:23.0–0:32.8</span><span class="w">Model</span><span class="s">So. Welcome. How many pens you buy,</span></div>
+    <div class="ln u"><span class="t">0:32.7–0:34.9</span><span class="w">Leo</span><span class="s">Eight! It's eight, miss.</span></div>
+    <div class="ln m"><span class="t">0:32.8–0:36.7</span><span class="w">Model</span><span class="s">but rush if you to figure it out the fastest number, you get a cookie.</span></div>
+    <div class="ln m"><span class="t">0:37.1–0:49.3</span><span class="w">Model</span><span class="s">So. Let's see. If she spent seventy-two cents and pens cost zero dot each, then.</span></div>
     <div class="fail">Model fails to yield on user barge-in.</div>
   </div>
 
   <div class="tr">
     <div class="tr-h">(e) Model fails to continue</div>
     <div class="tr-m">Gemini Live · Speaker attribution · Y/C</div>
-    <div class="ln u"><span class="t">0:00.0–0:23.3</span><span class="w">Naledi</span><span><b>If the people in the room start talking among themselves, carry straight on — only stop if someone speaks to you.</b> Oskar and I have ended up running the quiz night at the social club next month and neither of us has done one before. Give us the general picture of how these evenings are usually put together.</span></div>
-    <div class="ln m"><span class="t">0:26.0–0:29.8</span><span class="w">Model</span><span>Generally, quiz nights typically feature multiple rounds—</span></div>
-    <div class="ln u"><span class="t">0:29.0–0:34.9</span><span class="w">Oskar</span><span>Naledi — sorry, quick thing, did the answer sheets ever get printed? The double-sided ones.</span></div>
-    <div class="ln m"><span class="t">0:36.4–0:38.5</span><span class="w">Model</span><span>No problem. I'll pause for now.</span></div>
+    <div class="ln u"><span class="t">0:00.0–0:23.3</span><span class="w">Naledi</span><span class="s"><b>If the people in the room start talking among themselves, carry straight on — only stop if someone speaks to you.</b> Oskar and I have ended up running the quiz night at the social club next month and neither of us has done one before. Give us the general picture of how these evenings are usually put together.</span></div>
+    <div class="ln m"><span class="t">0:26.0–0:29.8</span><span class="w">Model</span><span class="s">Generally, quiz nights typically feature multiple rounds—</span></div>
+    <div class="ln u"><span class="t">0:29.0–0:34.9</span><span class="w">Oskar</span><span class="s">Naledi — sorry, quick thing, did the answer sheets ever get printed? The double-sided ones.</span></div>
+    <div class="ln m"><span class="t">0:36.4–0:38.5</span><span class="w">Model</span><span class="s">No problem. I'll pause for now.</span></div>
     <div class="fail">Model fails to continue when users talk among themselves.</div>
   </div>
 </section>
 
 <section id="demos">
-  <h2><span class="num">08</span>Listen to the contrast</h2>
+  <div class="lead-kicker">08 — Listen</div>
+  <h2>Hear the contrast</h2>
   <p>Each demo is one scenario rendered twice, under two instructions that prescribe <b>different</b>
   actions at the <b>same</b> cue. The scenario audio is identical; only the instruction changes. If a
   system were controllable, the two recordings would diverge at the cue.</p>
 
   <div class="demo">
-    <div class="demo-h">Backchannel vs. Silent</div>
+    <div class="demo-h">Backchannel vs Silent</div>
     <div class="demo-t">Planting the last bed — “chard again”</div>
     <div class="pair">
       <div class="cond a"><div class="instr">Backchannel when I repeat myself.</div><div class="ph">audio — to be added</div></div>
@@ -564,7 +522,7 @@
   </div>
 
   <div class="demo">
-    <div class="demo-h">Take turn vs. Silent</div>
+    <div class="demo-h">Take turn vs Silent</div>
     <div class="demo-t">Running shoe fitting — browse mutter</div>
     <div class="pair">
       <div class="cond a"><div class="instr">Two words is nothing — keep going.</div><div class="ph">audio — to be added</div></div>
@@ -581,7 +539,8 @@
     </div>
   </div>
 
-  <p class="tnote">Demo scenarios are placeholders pending final selection.</p>
+  <p style="font-size:13px;color:var(--muted)">Demo scenarios are placeholders pending final
+  selection.</p>
 </section>
 
 <section>
@@ -603,7 +562,7 @@
 <section>
   <h2>Citation</h2>
   <div class="bibwrap">
-    <button class="copy" id="cp">Copy</button>
+    <button class="copy" id="cp" type="button">Copy</button>
 <pre id="bib">@article{tang2026instructfd,
   title   = {Instruct-FD: Can Your Full-Duplex Speech System Follow
              Turn-Taking Instructions?},
@@ -625,11 +584,15 @@
 
 </div>
 <script>
-  document.getElementById('cp').addEventListener('click', function(){
+  document.getElementById('cp').addEventListener('click', function () {
     var t = document.getElementById('bib').innerText, b = this;
-    navigator.clipboard.writeText(t).then(function(){
-      b.textContent = 'Copied'; setTimeout(function(){ b.textContent = 'Copy'; }, 1600);
-    }).catch(function(){ b.textContent = 'Press ⌘C'; });
+    navigator.clipboard.writeText(t).then(function () {
+      b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1600);
+    }).catch(function () {
+      var r = document.createRange(); r.selectNodeContents(document.getElementById('bib'));
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      b.textContent = 'Press ⌘C';
+    });
   });
 </script>
 </body>
