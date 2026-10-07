@@ -278,6 +278,7 @@
 
 <div id="view-overview">
 <section id="overview">
+  <div class="lead-kicker">What is Instruct-FD?</div>
   <h2>Can a full-duplex speech system change its turn-taking behaviour when instructed to?</h2>
 
   <p>When you talk to a voice agent, it is deciding many times a minute whether to speak: keep
@@ -306,7 +307,7 @@
 </section>
 
 <section>
-  <h2>What is Instruct-FD?</h2>
+  <h2>One scenario, two opposite instructions</h2>
   <p>Every turn-taking instruction specifies <b>which floor action</b> to take at <b>which cue</b>.
   Instruct-FD pairs each scenario with two instructions that demand different actions at the same
   cue, so a model only scores by responding to the instruction rather than to the moment.</p>
@@ -341,7 +342,8 @@
 </section>
 
 <section>
-  <h2>Scoring</h2>
+  <div class="lead-kicker">Scoring</div>
+  <h2>Passing means obeying both</h2>
   <p><b>Paired pass rate</b> is the headline metric. A case counts as passed only when the model
   produces the prescribed behaviour under <b>both</b> instructions. Getting one side right and the
   other wrong scores zero, which is what separates genuine instruction following from a default that
@@ -353,7 +355,8 @@
 </section>
 
 <section>
-  <h2>Results</h2>
+  <div class="lead-kicker">Results</div>
+  <h2>No system reliably follows turn-taking instructions</h2>
 
   <h3 class="sub">Every configuration</h3>
   <div class="scroll-x">
@@ -522,7 +525,8 @@
 </section>
 
 <section>
-  <h2>Pipeline</h2>
+  <div class="lead-kicker">Pipeline</div>
+  <h2>How the data is built</h2>
   <p>Human-authored seeds cover every cue × instruction-contrast cell; an LLM expands them with new
   scenarios. Final cases are human-reviewed.</p>
 
@@ -585,7 +589,8 @@
 
 <div id="view-leaderboard" hidden>
 <section>
-  <h2>Leaderboard</h2>
+  <div class="lead-kicker">Leaderboard</div>
+  <h2>One score per model</h2>
   <p>Each system appears once, at its <b>best-scoring configuration</b>. Where a model was evaluated
   under more than one setting — Gemini Live with and without proactive mode, GPT-Realtime under VAD
   and SVAD — only the stronger result is listed, and the configuration is named beside it. Every
@@ -659,7 +664,8 @@
     { name:'DuplexCascade',            fam:'open',   open:true,  cfg:null,        paired: 2.1, per:31.1 },
     { name:'Freeze-Omni',              fam:'open',   open:true,  cfg:null,        paired: 1.0, per:20.0 }
   ];
-  var MAX = { paired: Math.max.apply(null, LB.map(function(r){return r.paired;})) };
+  // bars run against the full 0-100 scale, not the observed max, so 16.5% reads as 16.5%
+  var MAX = { paired: 100, per: 100 };
 
   var sortKey = 'paired', sortDir = -1, filter = 'all';
   var tbody = document.querySelector('#board tbody');

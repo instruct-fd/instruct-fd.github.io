@@ -1,19 +1,17 @@
-Make the leaderboard its own view; drop its per-instruction column
+Restore the green section kickers; scale leaderboard bars to 0-100
 
-Overview and Leaderboard are now a segmented tab pair rather than two
-more link pills, styled like the ihbench tabs: the selected one is
-highlighted, Overview by default. They swap which body renders, so the
-Leaderboard tab shows the board alone and nothing else. The hero stays
-in both, since it carries the title, authors and the headline numbers.
+I had inverted the ihbench pattern: there the green kicker carries the
+short label and the h2 carries a descriptive sentence. I had promoted
+the labels to h2 and dropped the kickers entirely. Now each major part
+has its kicker back - What is Instruct-FD?, Scoring, Results, Pipeline,
+Leaderboard - above a real title. The taxonomy section reads as a
+continuation of the opening part, so it has no kicker of its own, as
+with the unlabelled sections in ihbench.
 
-#leaderboard still deep-links to the board, and the tab rewrites the
-hash so the view survives a reload.
-
-The leaderboard keeps paired pass rate only. The per-instruction figures
-stay in the data with a note on how to restore the column; Figure 4 and
-the Scoring section still cover that metric.
-
-Headline stats go back to four tiles with 1,358 test cases restored
-between scenarios and systems evaluated.
+Leaderboard bars now measure against the full 0-100 scale rather than
+the observed maximum. Normalising to the max made GPT-Live-1's 16.5%
+fill the whole track, which read as a strong result and worked against
+the paper's own finding. At true scale the longest bar is a sixth of
+the track and the picture matches the claim.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
